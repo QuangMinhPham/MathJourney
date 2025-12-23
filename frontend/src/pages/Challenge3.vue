@@ -334,7 +334,7 @@ const saveFinalScore = async () => {
   const token = localStorage.getItem("token");
   const challengeId = 3 + ((chapterId - 1) * 3);
   try {
-    await fetch("api/scores/save", {
+    await fetch("/api/scores/save", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       body: JSON.stringify({ chapter_id: chapterId, challenge_id: challengeId, score: score.value })

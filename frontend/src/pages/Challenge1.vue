@@ -229,6 +229,31 @@ const endGame = () => {
   gameEnded.value = true;
   clearInterval(timerInterval);
   localStorage.removeItem(STORAGE_KEY);
+  saveScoreToDB();
+};
+
+const saveScoreToDB = async () => {
+  const token = localStorage.getItem("token");
+  // Challenge 1 thường có ID là 1, 4, 7... tùy theo Chapter
+  const challengeId = 1 + ((chapterId - 1) * 3); 
+  
+  try {
+    await fetch("/api/scores/save", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify({ 
+        chapter_id: chapterId, 
+        challenge_id: challengeId, 
+        score: score.value 
+      })
+    });
+    console.log("Đã lưu điểm thành công!");
+  } catch(e) {  
+    console.error("Lỗi lưu điểm:", e); 
+  }
 };
 
 const restartGame = () => window.location.reload();
