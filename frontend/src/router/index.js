@@ -8,6 +8,7 @@ import Challenge3 from '../pages/Challenge3.vue';
 // import ChallengeAI from '../pages/ChallengeAI.vue';
 // import Chat from '../pages/Chat.vue';
 import Leaderboard from '../pages/LeaderBoard.vue';
+import ChatBot from '../pages/ChatBot.vue';
 import Login from '../pages/Login.vue';
 
 const routes = [
@@ -24,6 +25,8 @@ const routes = [
   { path: '/lessons/:chapterId/challenge-1', component: Challenge1 },
   { path: '/lessons/:chapterId/challenge-2', component: Challenge2 },
   { path: '/lessons/:chapterId/challenge-3', component: Challenge3 },
+
+  { path: '/chatbot', component: ChatBot }
 ];
 
 export default createRouter({
