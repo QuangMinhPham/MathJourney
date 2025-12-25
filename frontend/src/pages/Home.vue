@@ -126,7 +126,7 @@ const navigateTo = (path) => {
       <div @click="navigateTo('/leaderboard')" class="option-btn">
         🏆 Bảng Xếp Hạng
       </div>
-      <div @click="navigateTo('/chatbox')" class="option-btn">
+      <div @click="navigateTo('/chatbot')" class="option-btn">
         📜 Hướng Dẫn 
       </div>
     </div>
