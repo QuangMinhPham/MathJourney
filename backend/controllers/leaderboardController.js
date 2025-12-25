@@ -11,7 +11,7 @@ const getLeaderboard = async (req, res) => {
                 (
                     SUM(CASE WHEN c.type = 'quiz' THEN up.score ELSE 0 END) + 
                     SUM(CASE WHEN c.type = 'matching' THEN up.score ELSE 0 END) + 
-                    (SUM(CASE WHEN c.type = 'short_answer' THEN up.score ELSE 0 END) * 3)
+                    SUM(CASE WHEN c.type = 'short_answer' THEN up.score ELSE 0 END)
                 ) AS total_score,
                 -- Đếm số thử thách khác nhau mà người dùng này đã tham gia
                 COUNT(DISTINCT up.challenge_id) AS completed_count,
