@@ -95,8 +95,10 @@ export default {
 
 <style scoped>
 /* Toàn bộ CSS giao diện cũ được giữ nguyên và đóng gói trong scoped */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 .challenges-page {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;  
   margin: 0;
   min-height: 100vh;
   /* Lưu ý: Đường dẫn ảnh nền nên để bắt đầu bằng dấu / để Vite tìm đúng trong public */
@@ -125,7 +127,7 @@ export default {
 }
 
 h1 {
-  font-family: 'Indie Flower', cursive;
+  font-family: "Inter", sans-serif;
   font-size: 3.5rem;
   color: #ffd700;
   text-shadow: 4px 4px 0px #3e2723;
@@ -241,7 +243,7 @@ h1 {
 .island-info h2 {
   margin: 0;
   font-size: 1.1rem;
-  font-family: 'Indie Flower', cursive;
+  font-family: "Inter", sans-serif;
   color: #ffeb3b;
 }
 

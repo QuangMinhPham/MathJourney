@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-amber-100 via-yellow-100 to-orange-100 p-4 md:p-8">
+  <div class="game-page min-h-screen bg-gradient-to-br from-amber-100 via-yellow-100 to-orange-100 p-4 md:p-8">
     <div class="max-w-6xl mx-auto">
       <div class="text-center mb-8">
         <div class="flex items-center justify-center gap-3 mb-4">
@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, nextTick, onUnmounted } from 'vue';
+import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import confetti from 'canvas-confetti';
 
@@ -150,19 +150,12 @@ const fetchData = async () => {
 
     const pairs = data.questions.flatMap(q => q.pairs);
 
-    // Xử lý dữ liệu bên trái
     leftItems.value = pairs.map((p, i) => ({
       ...p,
       domId: `chest-${i}`,
       expected: normalizeExpected(p.correct_match)
     }));
 
-    // Xử lý dữ liệu bên phải và trộn ngẫu nhiên
-    const rightData = pairs.map((p, i) => ({
-      ...p,
-      domId: `key-${i}`,
-      val: extractFirstLetter(p.right_text || "")
-    }));
     rightItems.value = pairs.map((p, i) => ({
       ...p,
       domId: `key-${i}`,
@@ -200,7 +193,6 @@ const getCenter = (id) => {
 
 const startDrag = (e, id, type) => {
   if (isChecked.value) return;
-  // Xóa nối cũ của point này nếu có
   connections.value = connections.value.filter(c => c.startId !== id && c.endId !== id);
 
   const pos = getCenter(id);
@@ -226,7 +218,6 @@ const endDrag = (e) => {
   const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
   const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
   
-  // Tìm element dưới điểm thả
   const el = document.elementFromPoint(clientX, clientY);
   const dot = el?.closest('.connector-dot');
   
@@ -236,7 +227,6 @@ const endDrag = (e) => {
       const targetId = parentCard.id;
       const targetType = targetId.startsWith('chest') ? 'chest' : 'key';
 
-      // Chỉ cho phép nối khác phía
       if (targetType !== startPoint.value.type) {
         connections.value = connections.value.filter(c => c.startId !== targetId && c.endId !== targetId);
         
@@ -326,7 +316,6 @@ const resultTitle = computed(() => {
   return "Cố lên nào! ⚓";
 });
 
-// Update lines on resize
 const handleResize = () => {
   connections.value = connections.value.map(c => {
     const p1 = getCenter(c.startId);
@@ -346,6 +335,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Nhập font Inter từ Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* Áp dụng font Inter cho toàn bộ trang */
+.game-page {
+  font-family: 'Inter', sans-serif;
+}
+
 .duo-card {
   background: white;
   border: 2px solid #e5e7eb;

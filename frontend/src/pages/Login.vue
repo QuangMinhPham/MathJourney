@@ -1,100 +1,103 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 // === STATE ===
-// Biến isLoginMode tương ứng với checkbox #chk trong code cũ
-// true = Đang ở màn hình Login, false = Đang ở màn hình Signup
-const isLoginMode = ref(true); 
+// true = Đang ở màn hình Login (Checked), false = Đang ở màn hình Signup
+const isLoginMode = ref(false); 
+const isLoading = ref(false);
+const showSuccessPopup = ref(false);
+const loginError = ref('');
 
 // Dữ liệu Form
-const loginForm = ref({ email: '', password: '' });
-const signupForm = ref({ name: '', email: '', password: '' });
+const signupForm = reactive({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+});
 
-// Trạng thái UI
-const loginError = ref('');
-const showSuccessPopup = ref(false);
-const isLoading = ref(false);
+const loginForm = reactive({
+  email: '',
+  password: ''
+});
 
-// === LOGIC XỬ LÝ ===
+// === LOGIC UI ===
+const passwordMatch = computed(() => {
+  if (signupForm.confirmPassword === '') return { text: '', class: '' };
+  return signupForm.password === signupForm.confirmPassword 
+    ? { text: '✓ Mật khẩu khớp', class: 'password-match success' }
+    : { text: '✗ Mật khẩu không khớp', class: 'password-match error' };
+});
 
-// 1. Đăng ký
+// === XỬ LÝ ĐĂNG KÝ ===
 const handleSignup = async () => {
+  if (isLoading.value) return;
+  if (signupForm.password !== signupForm.confirmPassword) {
+    alert('❌ Mật khẩu xác nhận không khớp!');
+    return;
+  }
+
   isLoading.value = true;
   try {
     const response = await fetch('/api/auth/add-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(signupForm.value),
+      body: JSON.stringify({
+        name: signupForm.name,
+        email: signupForm.email,
+        password: signupForm.password
+      })
     });
 
     if (!response.ok) {
       const text = await response.text();
-      alert("❌ " + text); // Giữ alert đơn giản hoặc có thể làm UI error đẹp hơn
+      alert("❌ " + text);
       return;
     }
-
-    // Thành công -> Hiện popup
     showSuccessPopup.value = true;
   } catch (error) {
-    alert("⚠️ Lỗi kết nối đến server: " + error.message);
+    alert("⚠️ Lỗi kết nối: " + error.message);
   } finally {
     isLoading.value = false;
   }
 };
 
-// 2. Đóng popup đăng ký thành công -> Chuyển sang Login
 const closePopup = () => {
   showSuccessPopup.value = false;
-  isLoginMode.value = true; // Chuyển checkbox thành checked (Login mode)
-  // Xóa form đăng ký cho sạch
-  signupForm.value = { name: '', email: '', password: '' };
+  isLoginMode.value = true; // Chuyển sang Login mode
+  Object.assign(signupForm, { name: '', email: '', password: '', confirmPassword: '' });
 };
 
-// 3. Đăng nhập
+// === XỬ LÝ ĐĂNG NHẬP ===
 const handleLogin = async () => {
+  if (isLoading.value) return;
   isLoading.value = true;
-  loginError.value = ''; // Reset lỗi cũ
+  loginError.value = '';
 
   try {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(loginForm.value),
+      body: JSON.stringify(loginForm)
     });
 
     const text = await response.text();
     let result;
-    try {
-      result = JSON.parse(text);
-    } catch {
-      result = text;
-    }
+    try { result = JSON.parse(text); } catch { result = text; }
 
     if (!response.ok) {
-      // Xử lý thông báo lỗi cụ thể
-      if (typeof result === 'string' && result.includes("Sai mật khẩu")) {
-        loginError.value = "Mật khẩu nhập sai!";
-      } else if (typeof result === 'string' && result.includes("không tồn tại")) {
-        loginError.value = "Tài khoản không tồn tại!";
-      } else {
-        loginError.value = result.message || "Đăng nhập thất bại!";
-      }
+      if (typeof result === 'string' && result.includes("Sai mật khẩu")) loginError.value = "Mật khẩu không đúng!";
+      else if (typeof result === 'string' && result.includes("không tồn tại")) loginError.value = "Tài khoản không tồn tại!";
+      else loginError.value = result.message || "Đăng nhập thất bại!";
       return;
     }
 
-    // Thành công
     localStorage.setItem('token', result.token);
-    
-    // Nếu server trả về link chuyển hướng (URL_directLink)
-    if (result.URL_directLink) {
-      window.location.href = result.URL_directLink;
-    } else {
-      router.push('/'); // Chuyển về trang chủ bằng Vue Router
-    }
-
+    if (result.URL_directLink) window.location.href = result.URL_directLink;
+    else router.push('/');
   } catch (error) {
     loginError.value = "Không thể kết nối đến server!";
   } finally {
@@ -109,199 +112,227 @@ const handleLogin = async () => {
       <source src="/images/background2.mp4" type="video/mp4">
     </video>
 
-    <div class="main">  	
-      <input type="checkbox" id="chk" aria-hidden="true" v-model="isLoginMode">
+    <div class="main">
+      <input type="checkbox" id="chk" v-model="isLoginMode" aria-hidden="true">
 
       <div class="signup">
-        <form @submit.prevent="handleSignup">
-          <div class="signup-label">Đăng Ký</div>
-          <input type="text" v-model="signupForm.name" placeholder="User name" required>
-          <input type="email" v-model="signupForm.email" placeholder="Email" required>
-          <input type="password" v-model="signupForm.password" placeholder="Password" required>
-          <button type="submit" :disabled="isLoading">
-            {{ isLoading ? 'Đang xử lý...' : 'Sign up' }}
-          </button>
-          <label for="chk">Đã có tài khoản? Đăng nhập ngay</label>
-        </form>
+        <div class="form-side-content">
+          <form @submit.prevent="handleSignup" class="form-container">
+            <h2 class="form-title">Tạo Tài Khoản</h2>
+            <p class="form-subtitle">Đăng ký để bắt đầu hành trình học tập</p>
+
+            <div class="input-group">
+              <label>Họ và tên</label>
+              <input type="text" v-model="signupForm.name" placeholder="Nhập tên của bạn" required>
+            </div>
+            <div class="input-group">
+              <label>Email</label>
+              <input type="email" v-model="signupForm.email" placeholder="example@email.com" required>
+            </div>
+            <div class="input-group">
+              <label>Mật khẩu</label>
+              <input type="password" v-model="signupForm.password" placeholder="Tối thiểu 6 ký tự" required minlength="6">
+            </div>
+            <div class="input-group">
+              <label>Xác nhận mật khẩu</label>
+              <input type="password" v-model="signupForm.confirmPassword" placeholder="Nhập lại mật khẩu" required>
+              <div :class="passwordMatch.class">{{ passwordMatch.text }}</div>
+            </div>
+
+            <button type="submit" class="submit-btn" :disabled="isLoading">
+              <span v-if="isLoading" class="loading-spinner"></span>
+              {{ isLoading ? 'Đang xử lý...' : 'Đăng Ký' }}
+            </button>
+            <label for="chk" class="switch-link">Đã có tài khoản? <span>Đăng nhập ngay</span></label>
+          </form>
+        </div>
       </div>
 
       <div class="login">
-        <form @submit.prevent="handleLogin">
-          <div class="signin-label">Đăng Nhập</div>
-          <input type="email" v-model="loginForm.email" placeholder="Email" required>
-          <input type="password" v-model="loginForm.password" placeholder="Password" required>
-          
-          <div v-if="loginError" class="error-message">{{ loginError }}</div>
-          
-          <button type="submit" :disabled="isLoading">
-            {{ isLoading ? 'Đang xử lý...' : 'Login' }}
-          </button>
-          <label for="chk">Chưa có tài khoản? Đăng ký ngay</label>
-        </form>
+        <div class="form-side-content">
+          <form @submit.prevent="handleLogin" class="form-container">
+            <h2 class="form-title">Chào Mừng Trở Lại</h2>
+            <p class="form-subtitle">Đăng nhập để tiếp tục học tập</p>
+
+            <div v-if="loginError" class="error-message">{{ loginError }}</div>
+
+            <div class="input-group">
+              <label>Email</label>
+              <input type="email" v-model="loginForm.email" placeholder="example@email.com" required>
+            </div>
+            <div class="input-group">
+              <label>Mật khẩu</label>
+              <input type="password" v-model="loginForm.password" placeholder="Nhập mật khẩu" required>
+            </div>
+
+            <button type="submit" class="submit-btn" :disabled="isLoading">
+              <span v-if="isLoading" class="loading-spinner"></span>
+              {{ isLoading ? 'Đang xử lý...' : 'Đăng Nhập' }}
+            </button>
+            <label for="chk" class="switch-link">Chưa có tài khoản? <span>Đăng ký ngay</span></label>
+          </form>
+        </div>
       </div>
 
-      <div class="img_login"></div>
+      <div class="decorative-side">
+        <div class="logo">🌊</div>
+        <h2>MathJourney</h2>
+        <p>Khám phá đại dương tri thức cùng chúng tôi. Hành trình chinh phục toán học bắt đầu từ đây!</p>
+        
+        <div class="features">
+          <div class="feature-item"><span class="icon">🏆</span><span class="text">Xếp hạng và thi đấu</span></div>
+          <div class="feature-item"><span class="icon">📚</span><span class="text">Bài học phong phú</span></div>
+          <div class="feature-item"><span class="icon">💎</span><span class="text">Kiếm phần thưởng</span></div>
+        </div>
+      </div>
     </div>
 
     <div v-if="showSuccessPopup" class="popup">
       <h3>🎉 Đăng ký thành công!</h3>
       <p>Bạn có thể đăng nhập ngay để tiếp tục.</p>
-      <button @click="closePopup">OK</button>
+      <button @click="closePopup">Đồng ý</button>
     </div>
   </div>
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Reset cơ bản cho component */
+input::placeholder {
+  color: rgba(0, 0, 0, 0.826); /* trắng mờ */
+}
+
 .login-page {
-  margin: 0; padding: 0;
   display: flex; justify-content: center; align-items: center;
-  min-height: 100vh;
-  font-family: 'Jost', sans-serif;
+  min-height: 100vh; font-family: 'Inter', sans-serif;
 }
 
-/* Video nền */
 .bg-video {
-  position: fixed; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover; z-index: -2;
-  pointer-events: none;
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: -2; pointer-events: none;
 }
 
-/* Khung chính */
 .main {
-  width: 700px; height: 550px;
-  overflow: hidden;
-  border-radius: 10px;
-  box-shadow: 5px 20px 50px #000;
-  position: relative;
-  background: white; /* Fallback */
+  width: 900px; height: 600px;
+  overflow: hidden; border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  position: relative; backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  /* opacity: 0.8; */
 }
 
 #chk { display: none; }
 
-/* --- FORM ĐĂNG KÝ --- */
-.signup {
-  position: absolute;
-  background: rgba(0,0,0,0.5); /* Nền tối cho signup */
-  width: 350px; height: 100%;
+/* --- FORM SIDES --- */
+.signup, .login {
+  position: absolute; width: 50%; height: 100%;
   transition: .8s ease-in-out;
-  z-index: 0;
 }
 
-.signup-label {
-  color: #fff; font-size: 2.3em;
-  justify-content: center; display: flex;
-  margin: 50px; font-weight: bold;
+.signup {   
+  left: 50%; 
+  z-index: -1;
+  opacity: 0;
 }
 
-/* --- FORM ĐĂNG NHẬP --- */
 .login {
+  left: 50%; 
+  z-index: 2;
+  opacity: 1;
+}
+
+.form-side-content {
+  padding: 50px 40px; height: 100%; overflow-y: auto;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+}
+
+/* --- DECORATIVE SIDE (KHỐI CHE TRƯỢT) --- */
+.decorative-side {
   position: absolute;
-  height: 100%; width: 350px;
-  background: rgba(255, 255, 255, 0.9); /* Nền sáng cho login */
-  transform: translateX(-350px); /* Mặc định ẩn bên trái */
+  width: 50%; height: 100%;
+  left: 0; /* Mặc định nằm bên phải */
+  background: rgba(0, 0, 0, 0.9);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px; text-align: center;
   transition: .8s ease-in-out;
+  z-index: 2; /* Luôn nằm trên cùng để che */
+}
+
+
+/* --- LOGIC TRƯỢT (Dựa trên checkbox) --- */
+#chk:checked ~ .login {
+  opacity: 0;
+  transform: translateX(-100%); /* Login trượt sang phải */
   z-index: -1;
 }
 
-.signin-label {
-  color: #000; font-size: 2.3em;
-  justify-content: center; display: flex;
-  margin: 50px; font-weight: bold;
-}
-
-/* --- HIỆU ỨNG TRƯỢT (IMG_LOGIN) --- */
-.img_login {
-  position: absolute;
-  height: 100%; width: 350px;
-  background-color: rgba(255, 255, 255, 1);
-  transform: translateX(350px);
-  transition: .8s ease-in-out;
-  z-index: 1;
-}
-
-/* --- INPUT & BUTTON --- */
-label {
-  color: #fff; font-size: 15px;
-  justify-content: center; display: flex;
-  margin: 50px; cursor: pointer;
-  transition: .5s ease-in-out;
-}
-
-.login label {
-  color: #000; transform: scale(.6);
-}
-
-input {
-  width: 60%; height: 20px;
-  background: #e0dede;
-  display: block; margin: 20px auto;
-  padding: 12px; border: none; outline: none;
-  border-radius: 5px;
-}
-
-button {
-  width: 60%; height: 40px;
-  margin: 30px auto 10px;
-  display: block; justify-content: center;
-  color: #fff; background: rgba(0,0,0,0.8);
-  font-size: 1em; font-weight: bold;
-  outline: none; border: none;
-  border-radius: 5px; cursor: pointer;
-  transition: .2s ease-in;
-}
-
-button:hover { background: #fff; color: black; border: 1px solid #333; }
-button:disabled { opacity: 0.7; cursor: not-allowed; }
-
-/* --- LOGIC CHUYỂN ĐỔI (Dựa trên checkbox #chk) --- */
-/* Khi #chk được check (Login Mode) */
-#chk:checked ~ .login {
-  transform: translateX(350px); /* Login trượt vào giữa từ trái */
-  z-index: 2; /* Lên trên cùng */
-}
-
 #chk:checked ~ .signup {
-  transform: translateX(700px); /* Signup trượt ra khỏi khung */
+  opacity: 1;
+  transform: translateX(-100%); /* Signup trượt ra ngoài khung bên phải */
+  z-index: 2;
 }
 
-#chk:checked ~ .img_login {
-  transform: translateX(0px); /* Khối che trượt về bên trái */
-  background-color: rgba(0,0,0,0.6); /* Đổi màu nền khối che */
+#chk:checked ~ .decorative-side {
+  transform: translateX(100%); /* Khối che trượt sang trái */
 }
 
-#chk:checked ~ .login label { transform: scale(1); }
+/* --- TRANG TRÍ & FORM STYLING (GIỮ NGUYÊN BẢN ĐẸP) --- */
+.decorative-side .logo { font-size: 60px; margin-bottom: 20px; animation: float 3s infinite; }
+.decorative-side h2 { color: white; font-size: 32px; font-weight: 700; margin-bottom: 15px; }
+.decorative-side p { color: rgba(255, 255, 255, 0.9); font-size: 15px; line-height: 1.6; max-width: 320px; }
 
-/* --- ERROR & POPUP --- */
+.features { margin-top: 30px; display: flex; flex-direction: column; gap: 12px; }
+.feature-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255, 255, 255, 0); padding: 10px 20px;
+  border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.feature-item .text { color: white; font-size: 14px; }
+
+.form-title { font-size: 28px; font-weight: 700; color: rgb(0, 0, 0); margin-bottom: 5px; }
+.form-subtitle { font-size: 14px; color: rgb(0, 0, 0); margin-bottom: 25px; }
+
+.input-group { margin-bottom: 15px; text-align: left; }
+.input-group label { display: block; font-size: 13px; color: rgba(0, 0, 0, 0.87); margin-bottom: 5px; font-weight: 600; }
+.input-group input {
+  width: 100%; height: 42px; padding: 0 15px;
+  background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px; color: rgb(0, 0, 0); outline: none; transition: 0.3s;
+}
+.input-group input:focus { border-color: white; background: rgba(255, 255, 255, 0.3); }
+
+.submit-btn {
+  width: 100%; height: 45px; margin-top: 15px;
+  border-radius: 8px; border: none; background: white;
+  color: #000000; font-weight: 700; cursor: pointer; transition: 0.3s;
+}
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+.switch-link { display: block; margin-top: 20px; color: rgb(0, 0, 0); font-size: 13px; cursor: pointer; }
+.switch-link span { text-decoration: underline; font-weight: 700; }
+
 .error-message {
-  color: red; font-size: 14px;
-  margin-top: 5px; text-align: center;
-  font-weight: bold;
+  background: rgba(255, 70, 70, 0.8); color: white;
+  padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 15px;
+  border-left: 4px solid #ff0000; animation: shake 0.3s;
 }
 
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* Popup & Loading styles... (giữ nguyên như bản trước) */
 .popup {
-  position: fixed; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
-  padding: 30px 40px;
-  text-align: center; z-index: 9999;
-  animation: fadeIn 0.3s ease-in-out;
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: white; padding: 30px; border-radius: 15px; text-align: center; z-index: 100;
 }
-
-.popup h3 { color: #333; margin-bottom: 10px; }
-.popup button {
-  margin-top: 15px; width: auto; padding: 8px 25px;
-  background: #4CAF50; color: white;
+.popup button { background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+.password-match { font-size: 12px; margin-top: 4px; }
+.password-match.success { color: #4ade80; }
+.password-match.error { color: #ff6b6b; }
+.loading-spinner {
+  display: inline-block; width: 14px; height: 14px; border: 2px solid #667eea;
+  border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 5px;
 }
-.popup button:hover { background: #45a049; color: white; border: none; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -60%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>

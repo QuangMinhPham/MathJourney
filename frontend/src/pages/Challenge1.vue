@@ -44,6 +44,11 @@
           v-for="(opt, idx) in currentQuestion.options" 
           :key="idx" 
           @click="checkAnswer(idx)"
+          :disabled="isAnswering"
+          :class="{
+            'correct-ans': isAnswering && idx === currentQuestion.correctIndex,
+            'wrong-ans': isAnswering && selectedIdx === idx && idx !== currentQuestion.correctIndex
+          }"
         >
           {{ opt }}
         </button>
@@ -90,6 +95,10 @@ const bubbleContainer = ref(null);
 let timerInterval = null;
 let bubbleInterval = null;
 
+// Thêm state mới để phục vụ hiệu ứng chọn đáp án
+const isAnswering = ref(false);
+const selectedIdx = ref(null);
+
 // === COMPUTED ===
 const formattedTime = computed(() => {
   const min = Math.floor(totalTime.value / 60);
@@ -115,31 +124,21 @@ const fetchQuestions = async () => {
     const res = await fetch(`/api/${chapterId}/challenge-1`);
     const data = await res.json();
     
-    // Kiểm tra nếu dữ liệu trả về có mảng questions
     if (data.questions && data.questions.length > 0) {
-      // Tiến hành chuẩn hóa dữ liệu để khớp với giao diện Vue
       gameQuestions.value = data.questions.map(q => {
-        // 1. Tìm vị trí (index) của đáp án đúng dựa trên thuộc tính is_correct === 1
         const correctIndex = q.options.findIndex(opt => opt.is_correct === 1);
-        
         return {
-          // Gán question_text vào thuộc tính text để hiển thị câu hỏi
           text: q.question_text,
-          // CHỖ QUAN TRỌNG: Chỉ lấy nội dung văn bản (option_text) của từng đáp án
           options: q.options.map(opt => opt.option_text),
-          // Lưu lại vị trí đáp án đúng để kiểm tra sau này
           correctIndex: correctIndex
         };
       });
     } else {
-      // Dữ liệu mẫu dự phòng nếu API không trả về kết quả
       gameQuestions.value = [
         { text: "Rác nào lâu phân hủy nhất?", options: ["Táo", "Giấy", "Chai nhựa"], correctIndex: 2 },
         { text: "Rùa biển hay ăn nhầm cái gì?", options: ["Túi nilon", "Cát", "Rong biển"], correctIndex: 0 }
       ];
     }
-
-    console.log("Dữ liệu sau khi chuẩn hóa:", gameQuestions.value);
     spawnTrash();
     initTimer();
   } catch (err) {
@@ -184,25 +183,33 @@ const handleTrashClick = (index) => {
   }
 };
 
-const checkAnswer = (selectedIdx) => {
-  const correct = gameQuestions.value[activeQuestionIndex.value].correctIndex;
-  if (selectedIdx === correct) {
-    score.value += 10;
-    trashItems.value[activeQuestionIndex.value].disabled = true;
-    // Hiệu ứng biến mất
-    setTimeout(() => {
-      trashItems.value[activeQuestionIndex.value].visible = false;
-    }, 300);
-  } else {
-    trashItems.value[activeQuestionIndex.value].disabled = true;
-  }
-  
-  activeQuestionIndex.value = null;
-  isPaused.value = false;
+const checkAnswer = (idx) => {
+  if (isAnswering.value) return;
 
-  if (trashItems.value.every(item => item.disabled)) {
-    endGame();
-  }
+  selectedIdx.value = idx;
+  isAnswering.value = true;
+
+  const correct = gameQuestions.value[activeQuestionIndex.value].correctIndex;
+  const isCorrect = idx === correct;
+
+  // Hiệu ứng delay để người dùng thấy màu xanh/đỏ
+  setTimeout(() => {
+    if (isCorrect) {
+      score.value += 10;
+    }
+    
+    trashItems.value[activeQuestionIndex.value].disabled = true;
+
+    // Reset trạng thái sau khi đã hiển thị xong hiệu ứng
+    isAnswering.value = false;
+    selectedIdx.value = null;
+    activeQuestionIndex.value = null;
+    isPaused.value = false;
+
+    if (trashItems.value.every(item => item.disabled)) {
+      endGame();
+    }
+  }, 1000); // Đợi 1 giây
 };
 
 const initTimer = () => {
@@ -234,7 +241,6 @@ const endGame = () => {
 
 const saveScoreToDB = async () => {
   const token = localStorage.getItem("token");
-  // Challenge 1 thường có ID là 1, 4, 7... tùy theo Chapter
   const challengeId = 1 + ((chapterId - 1) * 3); 
   
   try {
@@ -250,7 +256,6 @@ const saveScoreToDB = async () => {
         score: score.value 
       })
     });
-    console.log("Đã lưu điểm thành công!");
   } catch(e) {  
     console.error("Lỗi lưu điểm:", e); 
   }
@@ -292,11 +297,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 .challenge1-body {
   margin: 0; height: 100vh; overflow: hidden;
   background: url("/images/bg_ch1_2.jpg") no-repeat center center/cover;
   background-color: #0077b6;
-  font-family: "Fredoka", sans-serif;
+  font-family: "Inter", sans-serif;
   position: relative;
   width: 100vw;
 }
@@ -354,12 +362,36 @@ onUnmounted(() => {
   background: rgba(0,0,0,0.4); z-index: 999; backdrop-filter: blur(2px);
 }
 
+#questionText {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
 #answers button {
   display: block; width: 100%; margin: 12px 0; padding: 15px;
   border: none; border-radius: 15px; background: #f0f4f8;
-  cursor: pointer; font-size: 18px; font-weight: 600; transition: 0.2s;
+  cursor: pointer; font-size: 18px; font-weight: 600; transition: all 0.2s;
 }
-#answers button:hover { background: #90e0ef; color: #fff; }
+#answers button:hover:not(:disabled) { background: #90e0ef; color: #fff; }
+
+/* CSS Màu sắc cho đáp án */
+.correct-ans {
+  background-color: #0ee443 !important;
+  color: white !important;
+  transform: scale(1.05);
+}
+
+.wrong-ans {
+  background-color: #ff2525 !important;
+  color: white !important;
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
 
 .end-btn {
   display: inline-block; width: 45%; margin: 5px; padding: 12px 10px;

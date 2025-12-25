@@ -12,7 +12,7 @@
               v-for="char in specialChars" 
               :key="char"
               @click="insertSpecialChar(char)"
-              class="bg-blue-50 hover:bg-blue-500 hover:text-white border-2 border-blue-200 text-blue-700 font-bold py-3 rounded-lg transition-all active:scale-90 text-sm"
+              class="bg-blue-50 hover:bg-blue-500 hover:text-white border-2 border-blue-200 text-blue-700 font-bold py-3 rounded-lg transition-all active:scale-90 text-base"
               :disabled="isChecking"
             >
               {{ char }}

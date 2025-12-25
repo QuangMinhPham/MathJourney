@@ -20,10 +20,8 @@ const signup = async (req, res) => {
     const hash = await bcrypt.hash(password, saltRounds);
 
     // Insert vào DB
-    const sql = "INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, 'student')";
-    // Lưu ý: bảng users của bạn dùng cột 'username' làm email đăng nhập, 
-    // nên ta map email vào username, và name vào full_name
-    const [result] = await db.query(sql, [email, hash, name]);
+    const sql = "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, 'student')";
+    const [result] = await db.query(sql, [name, hash, email]);
 
     console.log("✅ User registered, ID:", result.insertId);
     res.status(201).send("Đăng ký thành công!");
@@ -39,7 +37,7 @@ const login = async (req, res) => {
 
   try {
     // Tìm user theo email (cột username trong DB)
-    const sql = "SELECT * FROM users WHERE username = ?";
+    const sql = "SELECT * FROM users WHERE email = ?";
     const [results] = await db.query(sql, [email]);
 
     if (results.length === 0) {
@@ -58,7 +56,7 @@ const login = async (req, res) => {
       {
         user_id: user.user_id,
         username: user.username,
-        email: user.username, // mapping username thành email
+        email: user.email, // mapping username thành email
         role: user.role,
       },
       JWT_SECRET,
