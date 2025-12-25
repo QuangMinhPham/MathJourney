@@ -5,7 +5,7 @@ const {
     authenticateToken,
     getUserProfile,
     getDatabase_users_accounts
-} = require('../controllers/web_controllers.js')
+} = require('../controllers/authController.js')
 
 
 router.route('/profile').get(authenticateToken,getUserProfile);

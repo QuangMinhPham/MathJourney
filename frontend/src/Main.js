@@ -1,19 +1,19 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import router from './router'; // Import router từ file cấu hình
-
-// Import CSS dùng chung
-import './assets/main.css'; 
-
-// Import FontAwesome (Nếu bạn cài qua npm)
-// Nếu bạn dùng CDN ở index.html thì không cần dòng này, 
-// nhưng tốt nhất nên cài: npm install @fortawesome/fontawesome-free
+import router from './router';
+import axios from 'axios';
+import './assets/main.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
+// TỰ ĐỘNG GỬI TOKEN TRONG MỌI REQUEST
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
+
 const app = createApp(App);
-
-// Sử dụng Router
 app.use(router);
-
-// Mount vào thẻ div#app trong index.html
 app.mount('#app');

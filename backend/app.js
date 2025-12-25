@@ -5,7 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 // === 1. IMPORT ROUTES (Theo đúng tên file trong ảnh của bạn) ===
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./routes/authRoute');
 const lessonRoutes = require("./routes/lessons");
 
 // Các loại thử thách
@@ -16,11 +16,11 @@ const shortAnswerRoutes = require("./routes/shortAnswerRoute"); // Short Answer 
 
 // Các tính năng khác
 const scoreRoutes = require("./routes/scores");
-const profileRoutes = require("./routes/profile");
 const aiRoutes = require("./routes/ai_routes");     // Chú ý: tên file trong ảnh là ai_routes.js
 const chatRoutes = require("./routes/chat_routes"); // Chú ý: tên file trong ảnh là chat_routes.js
 // const uploadRouter = require("./routes/upload"); // Tạm tắt nếu chưa dùng
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
+const profileRoutes = require('./routes/profileRoute');
 
 // === 2. CONFIG APP ===
 const PORT = process.env.PORT || 3000;
@@ -63,7 +63,6 @@ app.use("/api/challenges/short-answer", shortAnswerRoutes);
 app.use("/api/challenges", challengeRoutes);
 // Route Bảng xếp hạng
 app.use("/api/leaderboard", leaderboardRoutes);
-
 
 // Route Upload (Nếu dùng)
 // app.use("/api/upload", uploadRouter);
