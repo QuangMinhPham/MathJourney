@@ -2,7 +2,7 @@
 --
 -- Host: 127.0.0.1    Database: treasure_hunt
 -- ------------------------------------------------------
--- Server version	9.0.1
+-- Server version	8.0.44
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -18,17 +18,16 @@
 --
 -- Table structure for table `challenges`
 --
-CREATE DATABASE IF NOT EXISTS treasure_hunt;
-USE treasure_hunt;
+
 DROP TABLE IF EXISTS `challenges`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `challenges` (
   `challenge_id` int NOT NULL AUTO_INCREMENT,
   `chapter_id` int NOT NULL,
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` enum('quiz','matching','short_answer') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` enum('quiz','matching','short_answer') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `order_index` int DEFAULT NULL,
   PRIMARY KEY (`challenge_id`),
   KEY `chapter_id` (`chapter_id`),
@@ -55,8 +54,8 @@ DROP TABLE IF EXISTS `chapters`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `chapters` (
   `chapter_id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `order_index` int DEFAULT NULL,
   PRIMARY KEY (`chapter_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -88,7 +87,7 @@ CREATE TABLE `leaderboard` (
   PRIMARY KEY (`leaderboard_id`),
   UNIQUE KEY `unique_user` (`user_id`),
   CONSTRAINT `leaderboard_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,7 +96,7 @@ CREATE TABLE `leaderboard` (
 
 LOCK TABLES `leaderboard` WRITE;
 /*!40000 ALTER TABLE `leaderboard` DISABLE KEYS */;
-INSERT INTO `leaderboard` VALUES (1,4,380,NULL,'2025-12-16 14:46:34'),(2,5,20,NULL,'2025-11-24 00:36:32');
+INSERT INTO `leaderboard` VALUES (1,4,380,NULL,'2025-12-16 14:46:34'),(2,5,20,NULL,'2025-11-24 00:36:32'),(3,10,220,NULL,'2025-12-25 18:42:01'),(4,12,80,NULL,'2025-12-25 18:44:48'),(5,15,90,NULL,'2025-12-25 20:23:21');
 /*!40000 ALTER TABLE `leaderboard` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -111,11 +110,11 @@ DROP TABLE IF EXISTS `matching_pairs`;
 CREATE TABLE `matching_pairs` (
   `pair_id` int NOT NULL AUTO_INCREMENT,
   `question_id` int NOT NULL,
-  `left_text` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `left_image_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `right_text` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `right_image_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `correct_match` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `left_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `left_image_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `right_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `right_image_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `correct_match` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`pair_id`),
   KEY `question_id` (`question_id`),
   CONSTRAINT `matching_pairs_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE CASCADE
@@ -142,7 +141,7 @@ DROP TABLE IF EXISTS `options`;
 CREATE TABLE `options` (
   `option_id` int NOT NULL AUTO_INCREMENT,
   `question_id` int NOT NULL,
-  `option_text` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `option_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_correct` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`option_id`),
   KEY `question_id` (`question_id`),
@@ -170,10 +169,10 @@ DROP TABLE IF EXISTS `questions`;
 CREATE TABLE `questions` (
   `question_id` int NOT NULL AUTO_INCREMENT,
   `challenge_id` int NOT NULL,
-  `question_text` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `image_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `question_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `image_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `order_index` int DEFAULT NULL,
-  `difficulty` enum('easy','medium','hard') COLLATE utf8mb4_unicode_ci DEFAULT 'easy',
+  `difficulty` enum('easy','medium','hard') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'easy',
   PRIMARY KEY (`question_id`),
   KEY `challenge_id` (`challenge_id`),
   CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`challenge_id`) REFERENCES `challenges` (`challenge_id`) ON DELETE CASCADE
@@ -200,7 +199,7 @@ DROP TABLE IF EXISTS `short_answers`;
 CREATE TABLE `short_answers` (
   `answer_id` int NOT NULL AUTO_INCREMENT,
   `question_id` int NOT NULL,
-  `correct_answer` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `correct_answer` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`answer_id`),
   KEY `question_id` (`question_id`),
   CONSTRAINT `short_answers_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE CASCADE
@@ -213,7 +212,7 @@ CREATE TABLE `short_answers` (
 
 LOCK TABLES `short_answers` WRITE;
 /*!40000 ALTER TABLE `short_answers` DISABLE KEYS */;
-INSERT INTO `short_answers` VALUES (1,12,'3'),(2,13,'45'),(3,14,'75'),(4,15,'60'),(5,16,'Thước đo góc'),(6,28,'Mũi kéo'),(7,29,'Góc bẹt'),(8,30,'Đúng'),(9,31,'góc bé nhất'),(10,32,'Góc bẹt'),(11,44,'548263'),(12,45,'Ba trăm mười lăm nghìn bốn trăm linh sáu'),(13,46,'6'),(14,47,'299999'),(15,48,'407825'),(16,60,'999998'),(17,61,'10 000 000'),(18,62,'999 997; 999 999; 1 000 000'),(19,63,'Một triệu'),(20,64,'10 trăm nghìn'),(21,76,'4, 1, 6'),(22,77,'325 468 251'),(23,78,'Lớp triệu, hàng trăm triệu'),(24,79,'325 468 25'),(25,80,'300 000 (ba trăm nghìn)'),(26,92,'235 468 127'),(27,93,'Sáu trăm linh tám triệu ba trăm hai mươi lăm nghìn bốn trăm mười chín'),(28,94,'2'),(29,95,'500 000 000'),(30,96,'50 000 (năm mươi nghìn)'),(31,108,'3 500 000'),(32,109,'1 200 000'),(33,110,'9 900 000'),(34,111,'7 500 000'),(35,112,'8 400 000'),(36,124,'2 498, 2 499, 2 500'),(37,125,'9'),(38,126,'25'),(39,127,'998 510'),(40,128,'100 000'),(41,140,'42 tấn'),(42,141,'27 tạ'),(43,142,'60 yến'),(44,143,'750 kg'),(45,144,'100 tạ'),(46,156,'25 dm²'),(47,157,'24 dm²'),(48,158,'300 cm²'),(49,159,'4 dm'),(50,160,'4 dm²'),(51,172,'36 m²'),(52,173,'40 m²'),(53,174,'500 dm²'),(54,175,'60 m²'),(55,176,'=  (bằng nhau)'),(56,188,'400 mm²'),(57,189,'520 mm²'),(58,190,'6 cm²'),(59,191,'600 mm²'),(60,192,'4 800 mm²'),(61,204,'255'),(62,205,'325'),(63,206,'XIX'),(64,207,'XIX'),(65,208,'2100 giây'),(66,220,'100 kg'),(67,221,'25 dm²'),(68,222,'Chai A'),(69,223,'80 kg'),(70,224,'195 phút'),(71,236,'500 000'),(72,237,'236 340 kg'),(73,238,'675 000 m'),(74,239,'109 999'),(75,240,'551 200 sản phẩm'),(76,252,'283 570'),(77,253,'222 140'),(78,254,'364 152'),(79,255,'436 447'),(80,256,'592 815'),(81,268,'65'),(82,269,'3 190'),(83,270,'120'),(84,271,'175 + 125'),(85,272,'38'),(86,284,'375 lít'),(87,285,'700 m'),(88,286,'400'),(89,287,'600'),(90,288,'550 000 đồng'),(91,300,'10'),(92,301,'10'),(93,302,'40'),(94,303,'18'),(95,304,'50'),(96,316,'AB và AD, BC và CD'),(97,317,'Đặt đỉnh góc vuông của ê-ke trùng với giao điểm'),(98,318,'Cạnh bàn và chân bàn, mép tường và sàn nhà'),(99,319,'Không'),(100,320,'Vuông góc'),(101,332,'Có'),(102,333,'Không'),(103,334,'DC'),(104,335,'Song song'),(105,336,'Có'),(106,348,'6cm'),(107,349,'8cm'),(108,350,'2 cặp'),(109,351,'PQ'),(110,352,'24cm'),(111,364,'6cm'),(112,365,'Có'),(113,366,'2'),(114,367,'4'),(115,368,'Hình thoi');
+INSERT INTO `short_answers` VALUES (1,12,'3'),(2,13,'45°'),(3,14,'75°'),(4,15,'60°'),(5,16,'Thước đo góc'),(6,28,'Mũi kéo'),(7,29,'Góc bẹt'),(8,30,'Đúng'),(9,31,'góc bé nhất'),(10,32,'Góc bẹt'),(11,44,'548263'),(12,45,'Ba trăm mười lăm nghìn bốn trăm linh sáu'),(13,46,'6'),(14,47,'299999'),(15,48,'407825'),(16,60,'999998'),(17,61,'10 000 000'),(18,62,'999 997; 999 999; 1 000 000'),(19,63,'Một triệu'),(20,64,'10 trăm nghìn'),(21,76,'4, 1, 6'),(22,77,'325 468 251'),(23,78,'Lớp triệu, hàng trăm triệu'),(24,79,'325 468 25'),(25,80,'300 000 (ba trăm nghìn)'),(26,92,'235 468 127'),(27,93,'Sáu trăm linh tám triệu ba trăm hai mươi lăm nghìn bốn trăm mười chín'),(28,94,'2'),(29,95,'500 000 000'),(30,96,'50 000 (năm mươi nghìn)'),(31,108,'3 500 000'),(32,109,'1 200 000'),(33,110,'9 900 000'),(34,111,'7 500 000'),(35,112,'8 400 000'),(36,124,'2 498, 2 499, 2 500'),(37,125,'9'),(38,126,'25'),(39,127,'998 510'),(40,128,'100 000'),(41,140,'42 tấn'),(42,141,'27 tạ'),(43,142,'60 yến'),(44,143,'750 kg'),(45,144,'100 tạ'),(46,156,'25 dm²'),(47,157,'24 dm²'),(48,158,'300 cm²'),(49,159,'4 dm'),(50,160,'4 dm²'),(51,172,'36 m²'),(52,173,'40 m²'),(53,174,'500 dm²'),(54,175,'60 m²'),(55,176,'=  (bằng nhau)'),(56,188,'400 mm²'),(57,189,'520 mm²'),(58,190,'6 cm²'),(59,191,'600 mm²'),(60,192,'4 800 mm²'),(61,204,'255'),(62,205,'325'),(63,206,'XIX'),(64,207,'XIX'),(65,208,'2100 giây'),(66,220,'100 kg'),(67,221,'25 dm²'),(68,222,'Chai A'),(69,223,'80 kg'),(70,224,'195 phút'),(71,236,'500 000'),(72,237,'236 340 kg'),(73,238,'675 000 m'),(74,239,'109 999'),(75,240,'551 200 sản phẩm'),(76,252,'283 570'),(77,253,'222 140'),(78,254,'364 152'),(79,255,'436 447'),(80,256,'592 815'),(81,268,'65'),(82,269,'3 190'),(83,270,'120'),(84,271,'175 + 125'),(85,272,'38'),(86,284,'375 lít'),(87,285,'700 m'),(88,286,'400'),(89,287,'600'),(90,288,'550 000 đồng'),(91,300,'10'),(92,301,'10'),(93,302,'40'),(94,303,'18'),(95,304,'50'),(96,316,'AB và AD, BC và CD'),(97,317,'Đặt đỉnh góc vuông của ê-ke trùng với giao điểm'),(98,318,'Cạnh bàn và chân bàn, mép tường và sàn nhà'),(99,319,'Không'),(100,320,'Vuông góc'),(101,332,'Có'),(102,333,'Không'),(103,334,'DC'),(104,335,'Song song'),(105,336,'Có'),(106,348,'6cm'),(107,349,'8cm'),(108,350,'2 cặp'),(109,351,'PQ'),(110,352,'24cm'),(111,364,'6cm'),(112,365,'Có'),(113,366,'2'),(114,367,'4'),(115,368,'Hình thoi');
 /*!40000 ALTER TABLE `short_answers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -239,7 +238,7 @@ CREATE TABLE `user_progress` (
   CONSTRAINT `user_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `user_progress_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`chapter_id`),
   CONSTRAINT `user_progress_ibfk_3` FOREIGN KEY (`challenge_id`) REFERENCES `challenges` (`challenge_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -248,7 +247,7 @@ CREATE TABLE `user_progress` (
 
 LOCK TABLES `user_progress` WRITE;
 /*!40000 ALTER TABLE `user_progress` DISABLE KEYS */;
-INSERT INTO `user_progress` VALUES (1,4,2,5,100,1,'2025-11-08 01:11:07'),(2,4,3,8,100,1,'2025-11-08 01:11:45'),(3,4,8,23,20,1,'2025-11-08 01:12:50'),(4,4,18,53,20,1,'2025-11-22 12:49:54'),(5,4,19,56,20,1,'2025-11-22 12:52:42'),(6,4,11,32,0,1,'2025-11-22 12:53:47'),(7,4,4,10,100,1,'2025-11-22 12:55:23'),(8,4,1,2,20,1,'2025-11-24 00:19:29'),(9,5,1,2,20,1,'2025-11-24 00:36:32'),(10,4,9,26,0,1,'2025-12-16 14:46:34');
+INSERT INTO `user_progress` VALUES (1,4,2,5,100,1,'2025-11-08 01:11:07'),(2,4,3,8,100,1,'2025-11-08 01:11:45'),(3,4,8,23,20,1,'2025-11-08 01:12:50'),(4,4,18,53,20,1,'2025-11-22 12:49:54'),(5,4,19,56,20,1,'2025-11-22 12:52:42'),(6,4,11,32,0,1,'2025-11-22 12:53:47'),(7,4,4,10,100,1,'2025-11-22 12:55:23'),(8,4,1,2,20,1,'2025-11-24 00:19:29'),(9,5,1,2,20,1,'2025-11-24 00:36:32'),(10,4,9,26,0,1,'2025-12-16 14:46:34'),(11,10,1,1,60,1,'2025-12-25 18:41:03'),(12,10,1,2,60,1,'2025-12-25 18:41:33'),(13,10,1,3,100,1,'2025-12-25 18:42:01'),(14,12,2,6,80,1,'2025-12-25 18:44:48'),(15,15,1,1,30,1,'2025-12-25 19:55:13'),(16,15,1,3,60,1,'2025-12-25 20:23:21');
 /*!40000 ALTER TABLE `user_progress` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -261,15 +260,15 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `user_id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `full_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `role` enum('student','teacher','admin') COLLATE utf8mb4_unicode_ci DEFAULT 'student',
+  `username` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `full_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role` enum('student','teacher','admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'student',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -278,7 +277,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin01','123456','Quản trị viên',NULL,'admin','2025-11-06 14:57:36'),(2,'teacher01','123456','Cô Hoa',NULL,'teacher','2025-11-06 14:57:36'),(3,'student01','123456','Minh Bun',NULL,'student','2025-11-06 14:57:36'),(4,'123','$2b$10$9X1NwlTrmcQmnpvDzUpIoOr1Djv2qkyzfXBWBkF.Q6UKdnXtdHBrq',NULL,'user1@gmail.com','student','2025-11-08 01:10:24'),(5,'hocsinh1','$2b$10$AVHclGhJ6iFRjuF/TH5SP.sRrdjcl6608WjViG3/HWQi.7bEJ.U6i',NULL,'hocsinh1@gmail.com','student','2025-11-24 00:35:05'),(6,'user2','$2b$10$xydIIwdYTRL4RqGBb6/AAONuA0orUZKXfmCdF/AJzLtDDXi.ZOrjG',NULL,'user2@gmail.com','student','2025-12-16 23:00:23');
+INSERT INTO `users` VALUES (1,'admin01','123456','Quản trị viên',NULL,'admin','2025-11-06 14:57:36'),(2,'teacher01','123456','Cô Hoa',NULL,'teacher','2025-11-06 14:57:36'),(3,'student01','123456','Minh Bun',NULL,'student','2025-11-06 14:57:36'),(4,'123','$2b$10$9X1NwlTrmcQmnpvDzUpIoOr1Djv2qkyzfXBWBkF.Q6UKdnXtdHBrq',NULL,'user1@gmail.com','student','2025-11-08 01:10:24'),(5,'hocsinh1','$2b$10$AVHclGhJ6iFRjuF/TH5SP.sRrdjcl6608WjViG3/HWQi.7bEJ.U6i',NULL,'hocsinh1@gmail.com','student','2025-11-24 00:35:05'),(6,'user2','$2b$10$xydIIwdYTRL4RqGBb6/AAONuA0orUZKXfmCdF/AJzLtDDXi.ZOrjG',NULL,'user2@gmail.com','student','2025-12-16 23:00:23'),(7,'pminh7794@gmail.com','$2b$10$0RuGPXdoJfD79pQnxG4mZe7VjLHLPP5mNSTUZHUhmtMXaBhwfsGKq','admin',NULL,'student','2025-12-25 15:52:45'),(9,'pminh7795@gmail.com','$2b$10$wf2Q8rMlf4lEOHd9dfW2xu0Ia0/TRQI5f0BJBXb5URfHkLXvk0RQW','pminh7795@gmail.com',NULL,'student','2025-12-25 15:53:36'),(10,'utest@gmail.com','$2b$10$/7eFJBM1QnFQ1wVcMNp3be7O2uArsnzpDVJAb1PKDkmmZ6HVDltPa','utest@gmail.com',NULL,'student','2025-12-25 18:40:30'),(12,'utest1@gmail.com','$2b$10$Qie4Xs5b02oBws1wiPJ9se78l.Lb5x.PpuVRjZGTiF7SlnFaTNRJG','123',NULL,'student','2025-12-25 18:43:42'),(13,'emailtest@gmail.com','$2b$10$6T5eVVirgJwg.72mJvMwpeEWv1ShVuUS5TYQkxJ3b7t8XAUrYUQue',NULL,'emailtest','student','2025-12-25 19:15:17'),(15,'pass1','$2b$10$VHJXETQ5bEDomrjgtljdsOCCl9bhjlji5zIGntMJmQuP.V2UU.cxC',NULL,'pass2@gmail.com','student','2025-12-25 19:25:20');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -291,4 +290,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-21 22:55:49
+-- Dump completed on 2025-12-26  3:29:31
