@@ -20,6 +20,7 @@ const profileRoutes = require("./routes/profile");
 const aiRoutes = require("./routes/ai_routes");     // Chú ý: tên file trong ảnh là ai_routes.js
 const chatRoutes = require("./routes/chat_routes"); // Chú ý: tên file trong ảnh là chat_routes.js
 // const uploadRouter = require("./routes/upload"); // Tạm tắt nếu chưa dùng
+const leaderboardRoutes = require("./routes/leaderboardRoutes");
 
 // === 2. CONFIG APP ===
 const PORT = process.env.PORT || 3000;
@@ -60,6 +61,8 @@ app.use("/api/challenges/short-answer", shortAnswerRoutes);
 // Route cho game Quiz (Challenge 1) -> /api/challenges/:id
 // (Đặt cuối cùng để không bị "ăn" mất các route con ở trên)
 app.use("/api/challenges", challengeRoutes);
+// Route Bảng xếp hạng
+app.use("/api/leaderboard", leaderboardRoutes);
 
 
 // Route Upload (Nếu dùng)
