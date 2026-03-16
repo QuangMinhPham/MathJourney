@@ -1,14 +1,15 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios'; // Đảm bảo đã install axios
 
 const router = useRouter();
 
 // === STATE ===
 const isLoggedIn = ref(false);
 const username = ref("Người chơi");
-const avatar = ref("/images/default_avatar.jpg");
-const showMenu = ref(false); // Trạng thái ẩn/hiện menu logout
+const avatar = ref("/images/avatars/ava3.jpg"); // Avatar mặc định
+const showMenu = ref(false);
 const videoRef = ref(null);
 
 // === LOGIC KHỞI TẠO ===
@@ -23,33 +24,55 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange);
 });
 
-// Kiểm tra token trong localStorage
-const checkLoginStatus = () => {
+// Hàm giải mã JWT hỗ trợ Tiếng Việt (UTF-8)
+const decodeJWT = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    // Giải mã hỗ trợ ký tự đặc biệt tiếng Việt
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+};
+
+const checkLoginStatus = async () => {
   const token = localStorage.getItem('token');
   if (token) {
-    try {
-      // Decode JWT đơn giản (lấy phần payload ở giữa)
-      const payload = JSON.parse(atob(token.split('.')[1]));
+    // 1. Giải mã hiển thị tên tạm thời từ Token (đã fix lỗi font)
+    const payload = decodeJWT(token);
+    if (payload) {
       username.value = payload.username || "Người chơi";
-      
-      // Lấy avatar từ localStorage hoặc dùng mặc định
-      const savedAvatar = localStorage.getItem('avatar');
-      // Kiểm tra nếu avatar là đường dẫn tương đối thì thêm dấu / để Vue hiểu
-      if (savedAvatar) {
-        avatar.value = savedAvatar.startsWith('http') || savedAvatar.startsWith('/') 
-          ? savedAvatar 
-          : `/${savedAvatar}`;
-      }
-      
       isLoggedIn.value = true;
+    }
+
+    try {
+      // 2. Gọi API để lấy thông tin Avatar và Tên chính xác từ Database
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const response = await axios.get('/api/profile'); //
+      const user = response.data.userInfo;
+
+      // Cập nhật tên và avatar mới nhất từ DB
+      username.value = user.name || user.username;
+      
+      if (user.avatar) {
+        // Thêm timestamp ?t= để tránh trình duyệt lưu file cũ (cache)
+        avatar.value = `/images/avatars/${user.avatar}?t=${Date.now()}`;
+      } else {
+        avatar.value = "/images/avatars/ava3.jpg";
+      }
     } catch (err) {
-      console.warn("Token lỗi:", err);
-      logout();
+      console.warn("Không thể đồng bộ dữ liệu từ Server:", err);
+      // Nếu token hết hạn thì logout
+      if (err.response && err.response.status === 401) logout();
     }
   }
 };
 
-// Logic ẩn/hiện video khi tab bị ẩn để tiết kiệm tài nguyên
 const handleVisibilityChange = () => {
   if (document.hidden) {
     videoRef.value?.pause();
@@ -58,29 +81,22 @@ const handleVisibilityChange = () => {
   }
 };
 
-// === ACTIONS ===
 const toggleMenu = (event) => {
-  // Ngăn sự kiện click lan ra ngoài để không kích hoạt handleClickOutside ngay lập tức
   event.stopPropagation();
   showMenu.value = !showMenu.value;
 };
 
 const handleClickOutside = () => {
-  // Bấm ra ngoài thì đóng menu
-  if (showMenu.value) {
-    showMenu.value = false;
-  }
+  if (showMenu.value) showMenu.value = false;
 };
 
 const logout = () => {
   localStorage.removeItem("token");
-  localStorage.removeItem("avatar");
   isLoggedIn.value = false;
   showMenu.value = false;
   router.push('/login');
 };
 
-// Điều hướng
 const navigateTo = (path) => {
   router.push(path);
 };
@@ -93,20 +109,18 @@ const navigateTo = (path) => {
     </video>
 
     <div class="toolbar">
-      <div class="titlegame">
+      <div class="titlegame" @click="navigateTo('/')" style="cursor:pointer">
         <img src="/images/icon.png" alt="Icon" style="height:50px;">
         <div class="titlegame_name">ĐẢO GIẤU VÀNG</div>
       </div>
 
       <div class="auth-section">
-        
         <div v-if="isLoggedIn" class="user-info" @click="toggleMenu">
-          <span class="user-name">👋Hi, {{ username }} </span>
-          <img :src="avatar" alt="Avatar" @error="$event.target.src='/images/default_avatar.jpg'">
+          <span class="user-name">👋 Hi, {{ username }} </span>
+          <img :src="avatar" alt="Avatar" @error="$event.target.src='/images/avatars/ava3.jpg'">
           
           <div v-if="showMenu" class="logout-menu">
             <button @click.stop="navigateTo('/profile')">👤 Thông tin cá nhân</button>
-            <button @click.stop="navigateTo('/leaderboard')">🏆 Thành tích</button>
             <button id="logout-btn" @click.stop="logout">🚪 Đăng xuất</button>
           </div>
         </div>
@@ -115,20 +129,13 @@ const navigateTo = (path) => {
           <button class="signin-btn" @click="navigateTo('/login')">Sign In</button>
           <button class="signup-btn" @click="navigateTo('/login')">Sign Up</button>
         </div>
-
       </div>
     </div>
 
     <div class="options-btn">
-      <div @click="navigateTo('/lessons')" class="option-btn">
-        🏝️ Truy tìm kho báu
-      </div>
-      <div @click="navigateTo('/leaderboard')" class="option-btn">
-        🏆 Bảng xếp hạng
-      </div>
-      <div @click="navigateTo('/chatbot')" class="option-btn">
-        📜 Hướng dẫn 
-      </div>
+      <div @click="navigateTo('/lessons')" class="option-btn">🏝️ Truy tìm kho báu</div>
+      <div @click="navigateTo('/leaderboard')" class="option-btn">🏆 Bảng xếp hạng</div>
+      <div @click="navigateTo('/chatbot')" class="option-btn">📜 Hướng dẫn</div>
     </div>
   </div>
 </template>

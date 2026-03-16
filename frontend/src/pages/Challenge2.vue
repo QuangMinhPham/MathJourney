@@ -94,7 +94,7 @@
           :disabled="isChecked"
           class="bg-green-500 text-white px-12 py-4 rounded-2xl font-black text-xl hover:bg-green-600 transition-all border-b-4 border-green-700 active:border-b-0 active:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-           MỞ RƯƠNG
+          🚢 MỞ RƯƠNG
         </button>
       </div>
     </div>

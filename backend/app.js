@@ -20,7 +20,7 @@ const aiRoutes = require("./routes/ai_routes");     // Chú ý: tên file trong 
 const chatRoutes = require("./routes/chat_routes"); // Chú ý: tên file trong ảnh là chat_routes.js
 // const uploadRouter = require("./routes/upload"); // Tạm tắt nếu chưa dùng
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
-const profileRoutes = require('./routes/profileRoute');
+const profileRoutes = require('./routes/profileRoutes');
 
 // === 2. CONFIG APP ===
 const PORT = process.env.PORT || 3000;
