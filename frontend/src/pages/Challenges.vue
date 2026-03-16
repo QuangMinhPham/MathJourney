@@ -58,13 +58,13 @@ export default {
         },
         { 
           id: 2, 
-          name: "Rương Kho Báu", 
+          name: "Rương kho Báu", 
           icon: "/images/matching_icon.jpg", 
           des: "Tìm chìa khóa đúng để mở rương" 
         },
         { 
           id: 3, 
-          name: "Mật Mã Cổ Đại", 
+          name: "Mật mã cổ đại", 
           icon: "/images/short_icon.png", 
           des: "Điền đáp án nhanh để giải mã" 
         }

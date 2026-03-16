@@ -13,11 +13,6 @@
           Nối các rương câu hỏi với chìa khóa đáp án đúng!
         </p>
         
-        <div class="mt-4 inline-flex items-center gap-4 bg-white/90 px-8 py-3 rounded-full shadow-xl border-2 border-amber-200">
-          <span class="text-2xl font-black text-amber-800">
-            Điểm: {{ isChecked ? score : '---' }}
-          </span>
-        </div>
       </div>
 
       <div 
@@ -99,7 +94,7 @@
           :disabled="isChecked"
           class="bg-green-500 text-white px-12 py-4 rounded-2xl font-black text-xl hover:bg-green-600 transition-all border-b-4 border-green-700 active:border-b-0 active:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          🚢 MỞ RƯƠNG
+           MỞ RƯƠNG
         </button>
       </div>
     </div>

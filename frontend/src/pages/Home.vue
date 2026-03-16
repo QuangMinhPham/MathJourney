@@ -121,13 +121,13 @@ const navigateTo = (path) => {
 
     <div class="options-btn">
       <div @click="navigateTo('/lessons')" class="option-btn">
-        🏝️ Truy Tìm Kho Báu
+        🏝️ Truy tìm kho báu
       </div>
       <div @click="navigateTo('/leaderboard')" class="option-btn">
-        🏆 Bảng Xếp Hạng
+        🏆 Bảng xếp hạng
       </div>
       <div @click="navigateTo('/chatbot')" class="option-btn">
-        📜 Hướng Dẫn 
+        📜 Hướng dẫn 
       </div>
     </div>
   </div>
