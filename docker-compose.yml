@@ -21,14 +21,19 @@ services:
     restart: always
     env_file: ./backend/.env
     volumes:
+      # FIX 1: Giúp Backend ghi ảnh trực tiếp vào máy thật (Host)
+      # Giả sử WORKDIR trong Dockerfile backend là /app
       - ./frontend/public/images/avatars:/app/public/images/avatars
     depends_on:
       db:
         condition: service_healthy
-        
+
   frontend:
     build: ./frontend
     restart: always
+    # FIX 2: Đồng bộ thư mục ảnh để Vue thấy ảnh mới ngay lập tức mà không cần build lại
+    volumes:
+      - ./frontend/public/images/avatars:/usr/share/nginx/html/images/avatars:ro
 
   nginx:
     image: nginx:stable-alpine
@@ -37,7 +42,9 @@ services:
       - "443:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      # - /etc/letsencrypt:/etc/letsencrypt:ro
+      # FIX 3: Ánh xạ chứng chỉ SSL từ VPS vào container (Nếu đã có chứng chỉ)
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      # Phục vụ ảnh trực tiếp từ máy thật qua cổng 80/443
       - ./frontend/public/images/avatars:/usr/share/nginx/html/images/avatars:ro
     depends_on:
       - backend
