@@ -10,17 +10,19 @@ const lessonRoutes = require("./routes/lessons");
 
 // Các loại thử thách
 const quiz = require ("./routes/questions")
-const challengeRoutes = require("./routes/challengeRoutes"); // Quiz (Trắc nghiệm)
-const matchingRoutes = require('./routes/matching');         // Matching (Nối)
-const shortAnswerRoutes = require("./routes/shortAnswerRoute"); // Short Answer (Điền từ)
+const challengeRoutes = require("./routes/challengeRoutes"); 
+const matchingRoutes = require('./routes/matching');
+const shortAnswerRoutes = require("./routes/shortAnswerRoute"); 
 
 // Các tính năng khác
 const scoreRoutes = require("./routes/scores");
-const aiRoutes = require("./routes/ai_routes");     // Chú ý: tên file trong ảnh là ai_routes.js
-const chatRoutes = require("./routes/chat_routes"); // Chú ý: tên file trong ảnh là chat_routes.js
+const aiRoutes = require("./routes/ai_routes");     
+const chatRoutes = require("./routes/chat_routes"); 
+
 // const uploadRouter = require("./routes/upload"); // Tạm tắt nếu chưa dùng
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const profileRoutes = require('./routes/profileRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // === 2. CONFIG APP ===
 const PORT = process.env.PORT || 3000;
@@ -66,6 +68,10 @@ app.use("/api/leaderboard", leaderboardRoutes);
 
 // Route Upload (Nếu dùng)
 // app.use("/api/upload", uploadRouter);
+// Route Admin
+app.use("/api/admin", adminRoutes);
+
+// === 5. START SERVER ===
                 
 app.listen(PORT, () => {
     console.log(`✅ Server is running on port ${PORT}`);
