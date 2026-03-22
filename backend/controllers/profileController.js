@@ -97,4 +97,49 @@ const updateAvatarInDb = async (req, res) => {
     } catch (e) { res.status(500).json({ message: "Lỗi lưu avatar" }); }
 };
 
-module.exports = { getProfile, updateBasicInfo, changePassword, updateAvatarInDb };
+const updateAllProfile = async (req, res) => {
+    try {
+        const userId = req.user.user_id; // Lấy từ middleware verifyToken
+        const { full_name, username, email, phone, class_name, dob, gender } = req.body;
+
+        // Kiểm tra xem username mới có bị trùng với người khác không
+        const [existing] = await db.execute(
+            'SELECT user_id FROM users WHERE username = ? AND user_id != ?', 
+            [username, userId]
+        );
+        if (existing.length > 0) {
+            return res.status(400).json({ message: "Tên đăng nhập này đã có người sử dụng!" });
+        }
+
+        // Thực hiện cập nhật
+        const sql = `
+            UPDATE users 
+            SET full_name = ?, 
+                username = ?, 
+                email = ?, 
+                phone = ?, 
+                class_name = ?, 
+                dob = ?, 
+                gender = ? 
+            WHERE user_id = ?
+        `;
+        
+        await db.execute(sql, [
+            full_name || null, 
+            username, 
+            email || null, 
+            phone || null, 
+            class_name || null, 
+            dob || null, 
+            gender || 'Nam', 
+            userId
+        ]);
+
+        res.json({ message: "Hành trình của bạn đã được cập nhật thành công!" });
+    } catch (e) {
+        console.error("Lỗi updateAllProfile:", e.message);
+        res.status(500).json({ message: "Lỗi hệ thống khi cập nhật hồ sơ" });
+    }
+};
+
+module.exports = { getProfile, updateBasicInfo, changePassword, updateAvatarInDb, updateAllProfile };

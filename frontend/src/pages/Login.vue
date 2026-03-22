@@ -72,6 +72,10 @@ const closePopup = () => {
 };
 
 // === XỬ LÝ ĐĂNG NHẬP ===
+// frontend/src/pages/Login.vue - Trong hàm handleLogin
+
+// Trong script setup của Login.vue
+
 const handleLogin = async () => {
   if (isLoading.value) return;
   isLoading.value = true;
@@ -84,26 +88,36 @@ const handleLogin = async () => {
       body: JSON.stringify(loginForm)
     });
 
-    const text = await response.text();
-    let result;
-    try { result = JSON.parse(text); } catch { result = text; }
+    const result = await response.json();
 
     if (!response.ok) {
-      if (typeof result === 'string' && result.includes("Sai mật khẩu")) loginError.value = "Mật khẩu không đúng!";
-      else if (typeof result === 'string' && result.includes("không tồn tại")) loginError.value = "Tài khoản không tồn tại!";
-      else loginError.value = result.message || "Đăng nhập thất bại!";
+      loginError.value = result.message || "Đăng nhập thất bại!";
       return;
     }
 
+    // 1. Lưu token
     localStorage.setItem('token', result.token);
-    if (result.URL_directLink) window.location.href = result.URL_directLink;
-    else router.push('/');
+
+    // 2. Lấy role từ payload token hoặc từ result server trả về
+    const payload = JSON.parse(atob(result.token.split('.')[1]));
+    const userRole = payload.role;
+
+    // 3. ĐIỀU HƯỚNG THEO ROLE
+    if (userRole === 'admin' || userRole === 'teacher') {
+      // Dùng window.location để refresh lại toàn bộ state Admin cho sạch
+      window.location.href = '/admin'; 
+    } else {
+      // Học sinh thì về trang chủ học tập
+      router.push('/');
+    }
+
   } catch (error) {
-    loginError.value = "Không thể kết nối đến server!";
+    loginError.value = "Lỗi kết nối server!";
   } finally {
     isLoading.value = false;
   }
 };
+
 </script>
 
 <template>

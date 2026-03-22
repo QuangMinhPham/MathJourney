@@ -3,7 +3,7 @@
     <div class="flex justify-between items-end mb-8">
       <div>
         <h2 class="text-3xl font-black text-slate-800 italic uppercase flex items-center gap-3">
-          <Users class="w-10 h-10 text-blue-600"/> Quản lý Thủy Thủ
+          <Users class="w-10 h-10 text-blue-600"/> Quản lý Tài Khoản
         </h2>
         <p class="text-slate-500 font-bold ml-13">Hệ thống quản lý tài khoản học sinh Math Journey</p>
       </div>
@@ -32,7 +32,7 @@
         <thead class="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
           <tr>
             <th class="px-8 py-5">#</th>
-            <th class="px-6 py-5">Thủy thủ</th>
+            <th class="px-6 py-5">Tên</th>
             <th class="px-6 py-5">Lớp học</th>
             <th class="px-6 py-5">Email & SĐT</th>
             <th class="px-6 py-5">Trạng thái</th>

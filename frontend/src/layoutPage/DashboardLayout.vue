@@ -28,17 +28,23 @@
             <BarChart3 class="w-4 h-4" /> <span>Kết quả học tập</span>
         </router-link>
 
-        <router-link to="/admin/upload" class="nav-item" active-class="active">
+        <router-link to="/admin/uploads" class="nav-item" active-class="active">
           <UploadCloud class="w-4 h-4" /> <span>Quản lý tài liệu</span>
         </router-link>
       </nav>
 
-      <div class="p-4 border-t border-white/5 flex items-center gap-3 bg-slate-900/50">
-        <div class="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center font-bold text-white text-xs">QT</div>
-        <div class="overflow-hidden">
-          <p class="text-slate-200 text-xs font-bold truncate">Quản trị viên</p>
-          <p class="text-slate-500 text-[10px] truncate">admin@school.vn</p>
+      <div class="p-4 border-t border-white/5 flex items-center justify-between bg-slate-900/50">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-xs flex-shrink-0">QT</div>
+          <div class="overflow-hidden">
+            <p class="text-slate-200 text-xs font-bold truncate">Quản trị viên</p>
+            <p class="text-slate-500 text-[10px] truncate">admin@school.vn</p>
+          </div>
         </div>
+        
+        <button @click="handleLogout" class="p-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Đăng xuất">
+          <LogOut class="w-4 h-4" />
+        </button>
       </div>
     </aside>
 
@@ -72,8 +78,18 @@
 </template>
 
 <script setup>
-import { LayoutGrid, Users, Edit3, UploadCloud, Bell } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { LayoutGrid, Users, Edit3, UploadCloud, Bell, LogOut, BarChart3 } from 'lucide-vue-next';
+
+const router = useRouter();
 const currentDate = new Intl.DateTimeFormat('vi-VN', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+
+const handleLogout = () => {
+  if (confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống quản trị?")) {
+    localStorage.removeItem('token');
+    window.location.href = '/login'; // Chuyển về trang login và làm sạch bộ nhớ
+  }
+};
 </script>
 
 <style scoped>

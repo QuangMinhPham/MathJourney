@@ -192,4 +192,35 @@ const getGradesReport = async (req, res) => {
     }
 };
 
-module.exports = { getChapters, getChallengesByChapter, getQuestionsContent, updateQuestions, getAllStudents, updateStudent, deleteStudent, getGradesReport };
+const getOverviewStats = async (req, res) => {
+    try {
+        // Đếm tổng học sinh
+        const [[{ totalStudents }]] = await db.execute(
+            "SELECT COUNT(*) as totalStudents FROM users WHERE role = 'student'"
+        );
+        // Đếm bài nộp trong ngày hôm nay
+        const [[{ submissionsToday }]] = await db.execute(
+            "SELECT COUNT(*) as submissionsToday FROM user_progress WHERE DATE(attempt_date) = CURDATE()"
+        );
+        // Đếm số thử thách hiện có
+        const [[{ activeChallenges }]] = await db.execute(
+            "SELECT COUNT(*) as activeChallenges FROM challenges"
+        );
+        // Đếm tổng số giáo viên
+        const [[{ totalTeachers }]] = await db.execute(
+            "SELECT COUNT(*) as totalTeachers FROM users WHERE role = 'teacher'"
+        );
+
+        res.json({
+            totalStudents,
+            submissionsToday,
+            activeChallenges,
+            totalTeachers
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: "Lỗi tải thống kê hệ thống" });
+    }
+};
+
+module.exports = { getChapters, getChallengesByChapter, getQuestionsContent, updateQuestions, getAllStudents, updateStudent, deleteStudent, getGradesReport, getOverviewStats };
