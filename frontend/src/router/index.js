@@ -12,6 +12,12 @@ import ChatBot from '../pages/ChatBot.vue';
 import Login from '../pages/Login.vue';
 import Profile from '../pages/Profile.vue';
 
+import DashboardLayout from '../layoutPage/DashboardLayout.vue';
+import DashboardOverview from '../pages/admin/DashboardOverview.vue';
+import EditQuestions from '../pages/admin/EditQuestions.vue';
+import StudentsManagement from '../pages/admin/StudentsManagement.vue';
+import GradesManagement from '../pages/admin/GradesManagement.vue';
+
 const routes = [
   { path: '/', component: Home },
   { path: '/login', component: Login },
@@ -28,7 +34,14 @@ const routes = [
   { path: '/lessons/:chapterId/challenge-3', component: Challenge3 },
 
   {path: '/profile', component: Profile},
-  {path: '/chatbot', component: ChatBot }
+  {path: '/chatbot', component: ChatBot },
+  {path: '/admin', component: DashboardLayout,
+    children: [{ path: '', component: DashboardOverview, meta: { title: 'Tổng quan hệ thống' } },
+               { path: 'edit-questions', component: EditQuestions, meta: { title: 'Chỉnh sửa đề thi' } },
+               { path: 'students', component: StudentsManagement, meta: { title: 'Quản lý học sinh' } },
+               { path: 'grades', component: GradesManagement, meta: { title: 'Báo cáo điểm số' } }
+    ]
+  }
 ];
 
 export default createRouter({
