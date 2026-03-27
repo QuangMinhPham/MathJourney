@@ -72,7 +72,7 @@
               :class="getItemStatusClass('key-'+index)"
             >
               <img src="/images/chiakhoa.png" class="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0 opacity-90">
-              <div class="flex-1 text-lg font-bold text-amber-700 leading-tight">{{ item.right_text }}</div>
+              <div class="flex-1 text-lg font-bold text-amber-700 leading-tight">{{ item.display_text }}</div>
               
               <div class="connector-dot" style="left: -12px;"
                    @mousedown.stop="startDrag($event, 'key-'+index, 'key')"
@@ -154,7 +154,10 @@ const fetchData = async () => {
     rightItems.value = pairs.map((p, i) => ({
       ...p,
       domId: `key-${i}`,
-      val: extractFirstLetter(p.right_text || "")
+      // Dùng index để tạo chữ cái định danh (0→'a', 1→'b'...) thay vì trích xuất từ text
+      val: String.fromCharCode(97 + i),
+      // Hiển thị text đã bỏ prefix chữ cái (vd: 'a) Nội dung' → 'Nội dung')
+      display_text: stripPrefix(p.right_text || "")
     }));
   } catch (e) {
     console.error("Lỗi fetch:", e);
@@ -167,9 +170,9 @@ const normalizeExpected = (cm) => {
   return (parts.length > 1 ? parts[1] : parts[0]).toLowerCase().replace(/[).]/g, "");
 };
 
-const extractFirstLetter = (text) => {
-  const m = text?.trim().match(/^([A-Za-z0-9])/);
-  return m ? m[1].toLowerCase() : "";
+// Bỏ prefix chữ cái đầu dòng như 'a) ', 'b. ', 'A) ', '1. ' khỏi right_text
+const stripPrefix = (text) => {
+  return text.replace(/^[A-Za-z0-9][).]\s*/,'').trim();
 };
 
 // Drawing Logic

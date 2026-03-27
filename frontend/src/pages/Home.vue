@@ -11,6 +11,7 @@ const username = ref("Người chơi");
 const avatar = ref("/images/avatars/ava3.jpg"); // Avatar mặc định
 const showMenu = ref(false);
 const videoRef = ref(null);
+const userRole = ref("");
 
 // === LOGIC KHỞI TẠO ===
 onMounted(() => {
@@ -47,6 +48,7 @@ const checkLoginStatus = async () => {
     const payload = decodeJWT(token);
     if (payload) {
       username.value = payload.username || "Người chơi";
+      userRole.value = payload.role || "";
       isLoggedIn.value = true;
     }
 
@@ -58,6 +60,7 @@ const checkLoginStatus = async () => {
 
       // Cập nhật tên và avatar mới nhất từ DB
       username.value = user.name || user.username;
+      userRole.value = user.role || "";
       
       if (user.avatar) {
         // Thêm timestamp ?t= để tránh trình duyệt lưu file cũ (cache)
@@ -120,8 +123,11 @@ const navigateTo = (path) => {
           <img :src="avatar" alt="Avatar" @error="$event.target.src='/images/avatars/ava3.jpg'">
           
           <div v-if="showMenu" class="logout-menu">
-            <button @click.stop="navigateTo('/profile')">👤 Thông tin cá nhân</button>
-            <button id="logout-btn" @click.stop="logout">🚪 Đăng xuất</button>
+            <button @click.stop="navigateTo('/profile')">Thông tin cá nhân</button>
+            <button v-if="userRole === 'admin' || userRole === 'teacher'" @click.stop="navigateTo('/admin')" style="color: #3563E9; font-weight: 800;">
+              Trang quản lý
+            </button>
+            <button id="logout-btn" @click.stop="logout">Đăng xuất</button>
           </div>
         </div>
 
@@ -133,9 +139,9 @@ const navigateTo = (path) => {
     </div>
 
     <div class="options-btn">
-      <div @click="navigateTo('/lessons')" class="option-btn">🏝️ Truy tìm kho báu</div>
-      <div @click="navigateTo('/leaderboard')" class="option-btn">🏆 Bảng xếp hạng</div>
-      <div @click="navigateTo('/chatbot')" class="option-btn">📜 Hướng dẫn</div>
+      <div @click="navigateTo('/lessons')" class="option-btn">Truy tìm kho báu</div>
+      <div @click="navigateTo('/leaderboard')" class="option-btn">Bảng xếp hạng</div>
+      <div @click="navigateTo('/chatbot')" class="option-btn">Hướng dẫn</div>
     </div>
   </div>
 </template>

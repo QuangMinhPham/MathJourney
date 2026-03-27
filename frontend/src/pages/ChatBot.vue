@@ -20,9 +20,14 @@ const isTyping = ref(false);
 const chatBox = ref(null);
 const inputField = ref(null);
 
-// Lấy lịch sử từ localStorage
+// Lịch sử sidebar (3 câu hỏi gần nhất)
 const savedHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
 const history = ref(savedHistory);
+
+// Lịch sử hội thoại gửi lên Gemini (format: [{role, parts:[{text}]}])
+// Giới hạn 20 tin (10 lượt hỏi-đáp) để tránh vượt token limit
+const MAX_HISTORY_TURNS = 20;
+const conversationHistory = ref([]);
 
 const tags = ref([
   'Cách tính diện tích hình thang',
@@ -113,14 +118,25 @@ const sendMessage = async () => {
 
   isTyping.value = true;
   try {
-    // Gọi đến API backend của dự án
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({
+        message: text,
+        // Gửi lịch sử hội thoại (giới hạn MAX_HISTORY_TURNS tin gần nhất)
+        history: conversationHistory.value.slice(-MAX_HISTORY_TURNS),
+      })
     });
     const data = await res.json();
-    messages.value.push({ role: 'bot', text: data.reply });
+    const botReply = data.reply;
+
+    messages.value.push({ role: 'bot', text: botReply });
+
+    // Cập nhật lịch sử hội thoại cho lần gửi tiếp theo
+    conversationHistory.value.push(
+      { role: 'user',  parts: [{ text }] },
+      { role: 'model', parts: [{ text: botReply }] }
+    );
   } catch (err) {
     messages.value.push({ role: 'bot', text: "❌ Lỗi kết nối hải trình rồi!" });
   } finally {

@@ -57,6 +57,7 @@ CREATE TABLE `chapters` (
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `order_index` int DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`chapter_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -67,7 +68,7 @@ CREATE TABLE `chapters` (
 
 LOCK TABLES `chapters` WRITE;
 /*!40000 ALTER TABLE `chapters` DISABLE KEYS */;
-INSERT INTO `chapters` VALUES (1,'Bài 1: Góc và đơn vị đo góc',NULL,1),(2,'Bài 2: Góc tù, góc nhọn, góc bẹt',NULL,1),(3,'Bài 3: Số có 6 chữ số, số 1000000',NULL,1),(4,'Bài 4: Số có 6 chữ số, số 1000000 (tiếp theo)',NULL,1),(5,'Bài 5: Hàng và lớp',NULL,1),(6,'Bài 6: Các số trong phạm vi lớp triệu',NULL,1),(7,'Bài 7: Làm tròn đến số hàng trăm nghìn',NULL,1),(8,'Bài 8: Làm quen với dãy số tự nhiên',NULL,1),(9,'Bài 9: Yến, tạ, tấn',NULL,1),(10,'Bài 10: Đề xi mét vuông',NULL,1),(11,'Bài 11: Mét vuông',NULL,1),(12,'Bài 12: Mi li mét vuông',NULL,1),(13,'Bài 13: Giây, thế kỉ',NULL,1),(14,'Bài 14: Thực hành và trải nghiệm sử dụng một số đơn vị đo đạị lượng',NULL,1),(15,'Bài 15: Phép cộng các số có nhiều chữ số',NULL,1),(16,'Bài 16: Phép trừ các số có nhiều chữ số:',NULL,1),(17,'Bài 17: Tính chất giao hoán của phép cộng:',NULL,1),(18,'Bài 18: Tính chất phân phối của phép cộng:',NULL,1),(19,'Bài 19: Tìm hai số khi biết tổng và hiệu của hai số đó',NULL,1),(20,'Bài 20: Hai đường thẳng vuông góc:',NULL,1),(21,'Bài 21: Hai đường thẳng song song:',NULL,1),(22,'Bài 22: Hình bình hành:',NULL,1),(23,'Bài 23: Hình thoi:',NULL,1);
+INSERT INTO `chapters` VALUES (1,'Bài 1: Góc và đơn vị đo góc',NULL,1,'chapter_1.jpg'),(2,'Bài 2: Góc tù, góc nhọn, góc bẹt',NULL,1,'chapter_2.jpg'),(3,'Bài 3: Số có 6 chữ số, số 1000000',NULL,1,'chapter_3.jpg'),(4,'Bài 4: Số có 6 chữ số, số 1000000 (tiếp theo)',NULL,1,'chapter_4.jpg'),(5,'Bài 5: Hàng và lớp',NULL,1,'chapter_5.jpg'),(6,'Bài 6: Các số trong phạm vi lớp triệu',NULL,1,'chapter_6.jpg'),(7,'Bài 7: Làm tròn đến số hàng trăm nghìn',NULL,1,'chapter_7.jpg'),(8,'Bài 8: Làm quen với dãy số tự nhiên',NULL,1,'chapter_8.jpg'),(9,'Bài 9: Yến, tạ, tấn',NULL,1,'chapter_9.jpg'),(10,'Bài 10: Đề xi mét vuông',NULL,1,'chapter_10.jpg'),(11,'Bài 11: Mét vuông',NULL,1,'chapter_11.avif'),(12,'Bài 12: Mi li mét vuông',NULL,1,'chapter_12.avif'),(13,'Bài 13: Giây, thế kỉ',NULL,1,NULL),(14,'Bài 14: Thực hành và trải nghiệm sử dụng một số đơn vị đo đạị lượng',NULL,1,NULL),(15,'Bài 15: Phép cộng các số có nhiều chữ số',NULL,1,NULL),(16,'Bài 16: Phép trừ các số có nhiều chữ số:',NULL,1,NULL),(17,'Bài 17: Tính chất giao hoán của phép cộng:',NULL,1,NULL),(18,'Bài 18: Tính chất phân phối của phép cộng:',NULL,1,NULL),(19,'Bài 19: Tìm hai số khi biết tổng và hiệu của hai số đó',NULL,1,NULL),(20,'Bài 20: Hai đường thẳng vuông góc',NULL,1,NULL),(21,'Bài 21: Hai đường thẳng song song:',NULL,1,NULL),(22,'Bài 22: Hình bình hành:',NULL,1,NULL),(23,'Bài 23: Hình thoi:',NULL,1,'chapter_23.png');
 /*!40000 ALTER TABLE `chapters` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -87,7 +88,7 @@ CREATE TABLE `leaderboard` (
   PRIMARY KEY (`leaderboard_id`),
   UNIQUE KEY `unique_user` (`user_id`),
   CONSTRAINT `leaderboard_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -96,7 +97,7 @@ CREATE TABLE `leaderboard` (
 
 LOCK TABLES `leaderboard` WRITE;
 /*!40000 ALTER TABLE `leaderboard` DISABLE KEYS */;
-INSERT INTO `leaderboard` VALUES (3,10,280,NULL,'2026-03-22 20:10:23');
+INSERT INTO `leaderboard` VALUES (3,10,280,NULL,'2026-03-22 20:10:23'),(4,2,100,NULL,'2026-03-27 17:55:30');
 /*!40000 ALTER TABLE `leaderboard` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -238,7 +239,7 @@ CREATE TABLE `user_progress` (
   CONSTRAINT `user_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `user_progress_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`chapter_id`),
   CONSTRAINT `user_progress_ibfk_3` FOREIGN KEY (`challenge_id`) REFERENCES `challenges` (`challenge_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,7 +248,7 @@ CREATE TABLE `user_progress` (
 
 LOCK TABLES `user_progress` WRITE;
 /*!40000 ALTER TABLE `user_progress` DISABLE KEYS */;
-INSERT INTO `user_progress` VALUES (13,10,1,1,80,1,'2026-03-22 20:08:29'),(14,10,1,2,100,1,'2026-03-22 20:08:53'),(15,10,1,3,100,1,'2026-03-22 20:10:23');
+INSERT INTO `user_progress` VALUES (13,10,1,1,80,1,'2026-03-22 20:08:29'),(14,10,1,2,100,1,'2026-03-22 20:08:53'),(15,10,1,3,100,1,'2026-03-22 20:10:23'),(16,2,9,26,100,1,'2026-03-27 17:55:30');
 /*!40000 ALTER TABLE `user_progress` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -283,7 +284,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin1','$2b$10$lYxs5aMvlEqOCTDUTozT3eWxKsYJQqPuxDl.EUpKln4/E359v.kBq','admin1','admin1@gmail.com','teacher','2025-11-08 01:10:24','','','',NULL,'Nam','active'),(2,'admin2','$2b$10$L30DaP7ZgvMMiSvip/U/tuYrtfShAxT4lNQ7c8gNfv2n2yn8DHEOi','admin2','admin2@gmail.com','teacher','2026-03-22 19:57:55',NULL,NULL,NULL,NULL,'Nam','active'),(3,'admin3','$2b$10$QZ60EsuJAPI9q0vRwBW1JeZWd/SMyw2IA7rPBimnn5ann1Q7Ba2bG','admin3','admin3@gmail.com','teacher','2026-03-22 19:57:55',NULL,NULL,NULL,NULL,'Nam','active'),(10,'user10','$2b$10$fV2aj.6tzKlLrq2QRUejCuzj6pySw/hXl6A9ZjKRogzxeCN3AOBNq','Người dùng 10','user10@gmail.com','student','2026-03-22 20:07:50',NULL,NULL,NULL,NULL,'Nam','active');
+INSERT INTO `users` VALUES (1,'admin1','$2b$10$lYxs5aMvlEqOCTDUTozT3eWxKsYJQqPuxDl.EUpKln4/E359v.kBq','admin1','admin1@gmail.com','teacher','2025-11-08 01:10:24','','','',NULL,'Nam','active'),(2,'admin2','$2b$10$L30DaP7ZgvMMiSvip/U/tuYrtfShAxT4lNQ7c8gNfv2n2yn8DHEOi','admin2','admin2@gmail.com','teacher','2026-03-22 19:57:55','2.jpg','123','4A','2026-03-26','Nam','active'),(3,'admin3','$2b$10$QZ60EsuJAPI9q0vRwBW1JeZWd/SMyw2IA7rPBimnn5ann1Q7Ba2bG','admin3','admin3@gmail.com','teacher','2026-03-22 19:57:55',NULL,NULL,NULL,NULL,'Nam','active'),(10,'user10','$2b$10$fV2aj.6tzKlLrq2QRUejCuzj6pySw/hXl6A9ZjKRogzxeCN3AOBNq','Người dùng 10','user10@gmail.com','student','2026-03-22 20:07:50','10.jpg',NULL,NULL,NULL,'Nam','active');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -296,4 +297,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-23  4:31:46
+-- Dump completed on 2026-03-28  2:41:21

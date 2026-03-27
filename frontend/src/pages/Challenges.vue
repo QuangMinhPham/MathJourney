@@ -58,7 +58,7 @@ export default {
         },
         { 
           id: 2, 
-          name: "Rương kho Báu", 
+          name: "Rương kho báu", 
           icon: "/images/matching_icon.jpg", 
           des: "Tìm chìa khóa đúng để mở rương" 
         },

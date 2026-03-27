@@ -38,36 +38,36 @@
 
     <div class="max-w-6xl mx-auto space-y-4 relative z-10">
       <div
-        v-for="(student, index) in students"
-        :key="student.id"
+        v-for="student in students"
+        :key="student.rank"
         class="bg-gradient-to-r rounded-2xl shadow-2xl border-4 transform transition-all hover:scale-[1.02] hover:shadow-cyan-400/50 backdrop-blur"
-        :class="[getRankColor(index + 1), index < 3 ? 'p-6' : 'p-5']"
+        :class="[getRankColor(student.rank), student.rank <= 3 && currentPage === 1 ? 'p-6' : 'p-5']"
       >
         <div class="flex items-center gap-6">
           <div class="flex-shrink-0 w-44">
-            <div v-if="index === 0" class="flex items-center gap-2 text-yellow-300">
+            <div v-if="student.rank === 1 && currentPage === 1" class="flex items-center gap-2 text-yellow-300">
               <Crown class="w-8 h-8 animate-bounce drop-shadow-lg" />
               <span class="text-2xl font-black drop-shadow-md">Đô Đốc</span>
             </div>
-            <div v-else-if="index === 1" class="flex items-center gap-2 text-cyan-100">
+            <div v-else-if="student.rank === 2 && currentPage === 1" class="flex items-center gap-2 text-cyan-100">
               <Ship class="w-7 h-7 drop-shadow-lg" />
               <span class="text-xl font-black drop-shadow-md">Thuyền Trưởng</span>
             </div>
-            <div v-else-if="index === 2" class="flex items-center gap-2 text-orange-200">
+            <div v-else-if="student.rank === 3 && currentPage === 1" class="flex items-center gap-2 text-orange-200">
               <Anchor class="w-7 h-7 drop-shadow-lg" />
               <span class="text-xl font-black drop-shadow-md">Hoa Tiêu</span>
             </div>
             <div v-else class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-cyan-600 text-white text-xl font-bold shadow-lg border-2 border-white ml-4">
-              #{{ index + 1 }}
+              #{{ student.rank }}
             </div>
           </div>
 
-          <div :class="['flex-shrink-0 drop-shadow-lg', index < 3 ? 'text-7xl' : 'text-6xl']">
+          <div :class="['flex-shrink-0 drop-shadow-lg', student.rank <= 3 && currentPage === 1 ? 'text-7xl' : 'text-6xl']">
             {{ student.avatar }}
           </div>
 
           <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-white mb-2 drop-shadow-lg truncate" :class="index < 3 ? 'text-2xl' : 'text-xl'">
+            <h3 class="font-bold text-white mb-2 drop-shadow-lg truncate" :class="student.rank <= 3 && currentPage === 1 ? 'text-2xl' : 'text-xl'">
               {{ student.name }}
             </h3>
             <div class="flex flex-wrap gap-3">
@@ -92,7 +92,7 @@
 
           <div class="hidden lg:block flex-shrink-0 w-44">
             <div class="bg-white/40 backdrop-blur rounded-full h-5 overflow-hidden border-2 border-white/50 relative shadow-inner">
-              <div 
+              <div
                 class="bg-gradient-to-r from-cyan-300 via-blue-400 to-blue-500 h-full rounded-full transition-all duration-1000 relative"
                 :style="{ width: (student.completion_percentage || 0) + '%' }"
               >
@@ -102,16 +102,45 @@
               </div>
             </div>
             <div class="flex justify-between items-center mt-1.5 px-1">
-               <p class="text-[11px] text-white font-black drop-shadow-lg uppercase tracking-tighter">
-                 {{ student.participation_ratio }} bài đã làm
-               </p>
-               <p class="text-[11px] text-white font-black drop-shadow-lg">
-                 {{ student.completion_percentage }}%
-               </p>
+              <p class="text-[11px] text-white font-black drop-shadow-lg uppercase tracking-tighter">
+                {{ student.participation_ratio }} bài đã làm
+              </p>
+              <p class="text-[11px] text-white font-black drop-shadow-lg">
+                {{ student.completion_percentage }}%
+              </p>
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Phân trang -->
+    <div v-if="totalPages > 1" class="max-w-6xl mx-auto mt-6 flex items-center justify-center gap-2 relative z-10">
+      <button
+        @click="goToPage(currentPage - 1)"
+        :disabled="currentPage === 1"
+        class="w-10 h-10 rounded-xl bg-white/80 font-black text-blue-700 shadow disabled:opacity-40 hover:bg-white transition-all"
+      >‹</button>
+
+      <button
+        v-for="p in pageNumbers"
+        :key="p"
+        @click="goToPage(p)"
+        :class="['w-10 h-10 rounded-xl font-black shadow transition-all',
+          p === currentPage
+            ? 'bg-blue-700 text-white scale-110'
+            : 'bg-white/80 text-blue-700 hover:bg-white']"
+      >{{ p }}</button>
+
+      <button
+        @click="goToPage(currentPage + 1)"
+        :disabled="currentPage === totalPages"
+        class="w-10 h-10 rounded-xl bg-white/80 font-black text-blue-700 shadow disabled:opacity-40 hover:bg-white transition-all"
+      >›</button>
+
+      <span class="text-white font-bold text-sm ml-2 drop-shadow">
+        Trang {{ currentPage }} / {{ totalPages }} ({{ totalStudents }} học sinh)
+      </span>
     </div>
 
     <div class="max-w-6xl mx-auto mt-8 text-center relative z-10 mb-10">
@@ -129,37 +158,28 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import { 
-  Anchor, Ship, Waves, Compass, Crown, Star, Fish, Award, Gem 
+import {
+  Anchor, Ship, Waves, Compass, Crown, Star, Fish, Award, Gem
 } from 'lucide-vue-next';
 
-const students = ref([]);
+const students     = ref([]);
+const currentPage  = ref(1);
+const totalPages   = ref(1);
+const totalStudents = ref(0);
 
-// Tính toán tổng các chỉ số dựa trên TOP 10, đảm bảo ép kiểu Number()
 const stats = computed(() => [
-  { 
-    label: 'Thủy Thủ', 
-    value: students.value.length, 
-    icon: Ship, textColor: 'text-blue-600', bgIcon: 'bg-blue-100', border: 'border-blue-300' 
-  },
-  { 
-    label: 'Ngọc Trai', 
-    value: students.value.reduce((sum, s) => sum + Number(s.pearls || 0), 0), 
-    icon: Gem, textColor: 'text-pink-600', bgIcon: 'bg-pink-100', border: 'border-pink-300' 
-  },
-  { 
-    label: 'Vỏ Sò', 
-    value: students.value.reduce((sum, s) => sum + Number(s.shells || 0), 0), 
-    icon: Fish, textColor: 'text-orange-600', bgIcon: 'bg-orange-100', border: 'border-orange-300' 
-  },
-  { 
-    label: 'Kho Báu', 
-    value: students.value.reduce((sum, s) => sum + Number(s.treasure || 0), 0), 
-    icon: Award, textColor: 'text-yellow-600', bgIcon: 'bg-yellow-100', border: 'border-yellow-300' 
-  },
+  { label: 'Thủy Thủ',  value: totalStudents.value, icon: Ship,  textColor: 'text-blue-600',   bgIcon: 'bg-blue-100',   border: 'border-blue-300'   },
+  { label: 'Ngọc Trai', value: students.value.reduce((s, x) => s + x.pearls,  0), icon: Gem,   textColor: 'text-pink-600',   bgIcon: 'bg-pink-100',   border: 'border-pink-300'   },
+  { label: 'Vỏ Sò',     value: students.value.reduce((s, x) => s + x.shells,  0), icon: Fish,  textColor: 'text-orange-600', bgIcon: 'bg-orange-100', border: 'border-orange-300' },
+  { label: 'Kho Báu',   value: students.value.reduce((s, x) => s + x.treasure,0), icon: Award, textColor: 'text-yellow-600', bgIcon: 'bg-yellow-100', border: 'border-yellow-300' },
 ]);
 
-// Hàm trả về màu nền dựa trên thứ hạng
+const pageNumbers = computed(() => {
+  const pages = [];
+  for (let i = 1; i <= totalPages.value; i++) pages.push(i);
+  return pages;
+});
+
 const getRankColor = (rank) => {
   if (rank === 1) return "from-yellow-400 via-amber-500 to-orange-500 border-yellow-300";
   if (rank === 2) return "from-cyan-400 via-blue-400 to-blue-500 border-cyan-300";
@@ -167,17 +187,24 @@ const getRankColor = (rank) => {
   return "from-blue-400 to-cyan-500 border-blue-300";
 };
 
-// Gọi API lấy dữ liệu từ Backend
-const fetchData = async () => {
+const fetchData = async (page = 1) => {
   try {
-    const response = await axios.get('/api/leaderboard');
-    students.value = response.data;
+    const { data } = await axios.get(`/api/leaderboard?page=${page}`);
+    students.value     = data.data;
+    currentPage.value  = data.page;
+    totalPages.value   = data.totalPages;
+    totalStudents.value = data.total;
   } catch (err) {
     console.error("Lỗi khi tải bảng xếp hạng:", err);
   }
 };
 
-onMounted(fetchData);
+const goToPage = (page) => {
+  if (page < 1 || page > totalPages.value) return;
+  fetchData(page);
+};
+
+onMounted(() => fetchData(1));
 </script>
 
 <style scoped>

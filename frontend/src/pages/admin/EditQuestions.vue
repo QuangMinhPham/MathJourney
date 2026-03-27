@@ -25,6 +25,57 @@
           </select>
         </div>
       </div>
+
+      <!-- Sửa tên & ảnh bài học (hiện ra sau khi chọn bài) -->
+      <div v-if="selectedChapter" class="mb-6 p-5 bg-amber-50 border-2 border-amber-200 rounded-2xl space-y-4">
+
+        <!-- Tên bài học -->
+        <div>
+          <label class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-2">✏️ Tên Bài Học</label>
+          <div class="flex gap-3">
+            <input v-model="editingChapterTitle"
+              class="flex-1 bg-white border-2 border-amber-200 rounded-xl px-4 py-3 font-bold text-slate-700 outline-none focus:border-amber-400 transition-colors"
+              placeholder="Nhập tên bài học..." />
+            <button @click="saveChapterTitle" :disabled="isSavingTitle"
+              class="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-black px-6 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 whitespace-nowrap">
+              <Save class="w-4 h-4" /> {{ isSavingTitle ? 'Đang lưu...' : 'Lưu tên' }}
+            </button>
+          </div>
+          <p v-if="titleSaveMsg" class="mt-2 text-sm font-bold" :class="titleSaveMsg.ok ? 'text-green-600' : 'text-red-500'">
+            {{ titleSaveMsg.text }}
+          </p>
+        </div>
+
+        <!-- Ảnh minh họa -->
+        <div>
+          <label class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-2">🖼️ Ảnh Minh Họa</label>
+          <div class="flex items-center gap-4">
+            <!-- Preview ảnh hiện tại -->
+            <div class="w-24 h-16 rounded-xl overflow-hidden border-2 border-amber-200 bg-slate-100 flex-shrink-0">
+              <img v-if="currentChapterImage && !imageLoadError"
+                :key="currentChapterImage"
+                :src="currentChapterImage"
+                class="w-full h-full object-cover"
+                @error="imageLoadError = true"
+              />
+              <div v-else class="w-full h-full flex items-center justify-center text-slate-400 text-xs font-bold">Chưa có</div>
+            </div>
+            <!-- Nút chọn file -->
+            <div class="flex-1">
+              <input type="file" ref="chapterImageInput" class="hidden" accept="image/*" @change="handleChapterImageUpload" />
+              <button @click="chapterImageInput.click()" :disabled="isUploadingImage"
+                class="bg-white border-2 border-amber-300 hover:border-amber-500 text-amber-700 font-black px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 disabled:opacity-50">
+                <ImageIcon class="w-4 h-4" /> {{ isUploadingImage ? 'Đang tải...' : 'Chọn ảnh mới' }}
+              </button>
+            </div>
+          </div>
+          <p v-if="imageSaveMsg" class="mt-2 text-sm font-bold" :class="imageSaveMsg.ok ? 'text-green-600' : 'text-red-500'">
+            {{ imageSaveMsg.text }}
+          </p>
+        </div>
+
+      </div>
+
       <button @click="loadQuestions" :disabled="!selectedChallenge || loading" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-10 rounded-xl shadow-xl transition-all">
         {{ loading ? '⏳ ĐANG TẢI...' : ' LOAD DỮ LIỆU' }}
       </button>
@@ -99,7 +150,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { Save } from 'lucide-vue-next';
+import { Save, Image as ImageIcon } from 'lucide-vue-next';
 
 const chapters = ref([]);
 const challenges = ref([]);
@@ -108,6 +159,14 @@ const currentType = ref('');
 const selectedChapter = ref('');
 const selectedChallenge = ref('');
 const loading = ref(false);
+const editingChapterTitle = ref('');
+const isSavingTitle = ref(false);
+const titleSaveMsg = ref(null);
+const currentChapterImage = ref('');
+const imageLoadError = ref(false);
+const isUploadingImage = ref(false);
+const imageSaveMsg = ref(null);
+const chapterImageInput = ref(null); // template ref — bound via ref="chapterImageInput"
 
 onMounted(async () => {
   const res = await axios.get('/api/admin/chapters');
@@ -121,6 +180,54 @@ const fetchChallenges = async () => {
   selectedChallenge.value = '';
   questions.value = [];
   currentType.value = '';
+  titleSaveMsg.value = null;
+  imageSaveMsg.value = null;
+  imageLoadError.value = false;
+  // Điền sẵn tên và ảnh bài học hiện tại
+  const chapter = chapters.value.find(c => c.chapter_id === selectedChapter.value);
+  editingChapterTitle.value = chapter ? chapter.title : '';
+  currentChapterImage.value = chapter?.image ? `/images/chapters/${chapter.image}` : '';
+};
+
+const handleChapterImageUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  isUploadingImage.value = true;
+  imageSaveMsg.value = null;
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    const res = await axios.post(`/api/admin/chapter-image/${selectedChapter.value}`, fd);
+    const filename = res.data.filename;
+    // Cập nhật preview và cache trong danh sách chapters
+    imageLoadError.value = false;
+    currentChapterImage.value = `/images/chapters/${filename}?t=${Date.now()}`;
+    const chapter = chapters.value.find(c => c.chapter_id === selectedChapter.value);
+    if (chapter) chapter.image = filename;
+    imageSaveMsg.value = { ok: true, text: '✅ Đã cập nhật ảnh minh họa!' };
+  } catch {
+    imageSaveMsg.value = { ok: false, text: 'Lỗi khi tải ảnh lên' };
+  } finally {
+    isUploadingImage.value = false;
+    e.target.value = ''; // reset input để có thể chọn lại cùng file
+  }
+};
+
+const saveChapterTitle = async () => {
+  if (!editingChapterTitle.value.trim()) return;
+  isSavingTitle.value = true;
+  titleSaveMsg.value = null;
+  try {
+    await axios.put(`/api/admin/update-chapter/${selectedChapter.value}`, { title: editingChapterTitle.value });
+    // Cập nhật lại tên trong danh sách dropdown
+    const chapter = chapters.value.find(c => c.chapter_id === selectedChapter.value);
+    if (chapter) chapter.title = editingChapterTitle.value.trim();
+    titleSaveMsg.value = { ok: true, text: '✅ Đã cập nhật tên bài học!' };
+  } catch (e) {
+    titleSaveMsg.value = { ok: false, text: e.response?.data?.message || 'Lỗi khi lưu tên bài học' };
+  } finally {
+    isSavingTitle.value = false;
+  }
 };
 
 // Hàm tạo cấu trúc câu hỏi trống

@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 const getChapters = async (req, res) => {
     try {
-        const [rows] = await db.execute('SELECT chapter_id, title FROM chapters ORDER BY chapter_id');
+        const [rows] = await db.execute('SELECT chapter_id, title, image FROM chapters ORDER BY chapter_id');
         res.json(rows);
     } catch (e) { res.status(500).json({ message: "Lỗi DB" }); }
 };
@@ -223,4 +223,28 @@ const getOverviewStats = async (req, res) => {
     }
 };
 
-module.exports = { getChapters, getChallengesByChapter, getQuestionsContent, updateQuestions, getAllStudents, updateStudent, deleteStudent, getGradesReport, getOverviewStats };
+const updateChapter = async (req, res) => {
+    const { chapterId } = req.params;
+    const { title } = req.body;
+    if (!title || !title.trim()) return res.status(400).json({ message: "Tên bài học không được để trống!" });
+    try {
+        await db.execute('UPDATE chapters SET title = ? WHERE chapter_id = ?', [title.trim(), chapterId]);
+        res.json({ message: "✅ Đã cập nhật tên bài học!" });
+    } catch (e) {
+        console.error("Lỗi updateChapter:", e);
+        res.status(500).json({ message: "Lỗi cập nhật tên bài học" });
+    }
+};
+
+const updateChapterImage = async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: "Không có file ảnh!" });
+    try {
+        await db.execute('UPDATE chapters SET image = ? WHERE chapter_id = ?', [req.file.filename, req.params.chapterId]);
+        res.json({ filename: req.file.filename });
+    } catch (e) {
+        console.error("Lỗi updateChapterImage:", e);
+        res.status(500).json({ message: "Lỗi lưu ảnh bài học" });
+    }
+};
+
+module.exports = { getChapters, getChallengesByChapter, getQuestionsContent, updateQuestions, getAllStudents, updateStudent, deleteStudent, getGradesReport, getOverviewStats, updateChapter, updateChapterImage };

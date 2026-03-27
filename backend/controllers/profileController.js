@@ -4,8 +4,10 @@ const bcrypt = require('bcrypt');
 const getProfile = async (req, res) => {
     const userId = req.user.user_id;
     try {
+        // Thêm u.phone, u.class_name, u.dob, u.gender vào câu lệnh SELECT 
         const statsQuery = `
-            SELECT u.username, u.full_name, u.email, u.avatar,
+            SELECT u.username, u.full_name, u.email, u.avatar, u.role, 
+                   u.phone, u.class_name, u.dob, u.gender,
                 COALESCE(SUM(CASE WHEN c.type = 'quiz' THEN up.score ELSE 0 END), 0) AS pearls,
                 COALESCE(SUM(CASE WHEN c.type = 'matching' THEN up.score ELSE 0 END), 0) AS shells,
                 COALESCE(SUM(CASE WHEN c.type = 'short_answer' THEN up.score ELSE 0 END), 0) AS treasures,
@@ -46,7 +48,13 @@ const getProfile = async (req, res) => {
                 username: user.username,
                 name: user.full_name || user.username,
                 email: user.email,
-                avatar: user.avatar, 
+                avatar: user.avatar,
+                role: user.role,
+                // Bổ sung các trường còn thiếu vào phản hồi JSON 
+                phone: user.phone || '',
+                class: user.class_name || '', // Map class_name từ DB sang class cho Frontend 
+                dob: user.dob ? new Date(user.dob).toISOString().split('T')[0] : '', 
+                gender: user.gender || 'Chưa xác định',
                 rank: rankPos,
                 title: rankPos === 1 ? "Đô Đốc Hải Quân" : (rankPos <= 3 ? "Thuyền Trưởng" : "Thủy Thủ")
             },
@@ -59,22 +67,9 @@ const getProfile = async (req, res) => {
             ]
         });
     } catch (error) {
+        console.error("Lỗi getProfile:", error);
         res.status(500).json({ message: "Lỗi hệ thống" });
     }
-};
-
-const updateBasicInfo = async (req, res) => {
-    const { name, username } = req.body;
-    const userId = req.user.user_id;
-    try {
-        if (username) {
-            const [check] = await db.execute('SELECT user_id FROM users WHERE username = ? AND user_id != ?', [username, userId]);
-            if (check.length > 0) return res.status(400).json({ message: "Username đã tồn tại!" });
-            await db.execute('UPDATE users SET username = ? WHERE user_id = ?', [username, userId]);
-        }
-        if (name) await db.execute('UPDATE users SET full_name = ? WHERE user_id = ?', [name, userId]);
-        res.json({ message: "Cập nhật thành công!" });
-    } catch (e) { res.status(500).json({ message: "Lỗi cập nhật" }); }
 };
 
 const changePassword = async (req, res) => {
@@ -142,4 +137,4 @@ const updateAllProfile = async (req, res) => {
     }
 };
 
-module.exports = { getProfile, updateBasicInfo, changePassword, updateAvatarInDb, updateAllProfile };
+module.exports = { getProfile, changePassword, updateAvatarInDb, updateAllProfile };

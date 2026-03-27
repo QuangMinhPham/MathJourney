@@ -194,6 +194,10 @@
               <Calendar class="text-purple-600" /> Hoạt Động Gần Đây
             </h3>
             <div class="space-y-3">
+              <div v-if="data.recentActivities.length === 0"
+                class="flex items-center justify-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 font-semibold">
+                Chưa có hoạt động nào gần đây
+              </div>
               <div v-for="act in data.recentActivities" :key="act.date"
                 class="flex items-center justify-between p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
                 <div>
@@ -332,7 +336,15 @@ function cancelEdit() {
 async function saveAllInfo() {
   isSaving.value = true;
   try {
-    await axios.put('/api/profile/update', { ...editForm.value });
+    await axios.put('/api/profile/update', {
+      full_name:  editForm.value.name,
+      username:   editForm.value.username,
+      email:      editForm.value.email,
+      phone:      editForm.value.phone,
+      class_name: editForm.value.class,
+      dob:        editForm.value.dob,
+      gender:     editForm.value.gender,
+    });
     // Sync back into local data
     Object.assign(data.value.userInfo, editForm.value);
     saveSuccess.value = true;

@@ -35,7 +35,7 @@
             <th class="px-6 py-5">Tên</th>
             <th class="px-6 py-5">Lớp học</th>
             <th class="px-6 py-5">Email & SĐT</th>
-            <th class="px-6 py-5">Trạng thái</th>
+            <th class="px-6 py-5">Trạng thái</th> 
             <th class="px-8 py-5 text-right">Hành động</th>
           </tr>
         </thead>

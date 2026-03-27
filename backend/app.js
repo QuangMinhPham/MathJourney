@@ -72,7 +72,7 @@ app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/admin", adminRoutes);
 
 // === 5. START SERVER ===
-                
+
 app.listen(PORT, () => {
     console.log(`✅ Server is running on port ${PORT}`);
     console.log(`🚀 Mode: ${process.env.NODE_ENV || 'development'}`);

@@ -39,10 +39,9 @@
               @click="openLesson(lesson.chapter_id)"
             >
               <div class="lesson-img">
-                <img 
-                  :src="`/images/${lesson.chapter_id}.jpg`" 
-                  onerror="this.src='/images/treasure_map.jpg'" 
-                  alt="banner" 
+                <img
+                  :src="lesson.image ? `/images/chapters/${lesson.image}` : '/images/treasure_map.jpg'"
+                  alt="banner"
                   draggable="false"
                 >
               </div>
