@@ -12,6 +12,11 @@ QUY TẮC TRÌNH BÀY:
 2. Sử dụng dấu gạch đầu dòng cho các bước giải.
 3. In đậm các con số hoặc kết quả quan trọng.
 4. Chỉ trả lời các vấn đề học tập. Nếu không liên quan, hãy nói: "⚓ Hãy hỏi ta về Toán học để tìm kho báu tri thức nhé!"
+
+QUY TẮC ĐỊNH DẠNG KÝ HIỆU (RẤT QUAN TRỌNG):
+- TUYỆT ĐỐI KHÔNG dùng ký hiệu LaTeX như $a$, $b$, \\frac{}{}, \\times, \\div, v.v.
+- Thay thế bằng chữ tiếng Việt thông thường: viết "a", "b", "×", "÷", "(a + b) / 2" thay vì dùng LaTeX.
+- Công thức viết dạng văn bản thuần: ví dụ "Diện tích = (đáy lớn + đáy bé) × chiều cao ÷ 2"
 `.trim();
 
 async function chatWithAI(req, res) {

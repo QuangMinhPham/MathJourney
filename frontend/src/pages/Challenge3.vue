@@ -197,6 +197,7 @@ const feedbackType = ref("");
 const mainInput = ref(null);
 const showHint = ref(false);
 const isComposing = ref(false);
+const questionResults = ref([]);
 
 // Danh sách ký tự đặc biệt
 const specialChars = ref(['m²', 'dm²', 'cm²', 'km²', 'mm²', '°', '±', '≈', '≤', '≥', '×', '÷', 'π', '√', '∞', '%']);
@@ -301,6 +302,14 @@ const submitAnswer = async () => {
 
   const isCorrect = userClean === correctClean;
 
+  questionResults.value.push({
+    question_id: currentQuestion.value.question_id,
+    question_text: currentQuestion.value.question_text,
+    correct_answer: currentQuestion.value.correct_answer,
+    user_answer: userAnswer.value,
+    is_correct: isCorrect
+  });
+
   if (isCorrect) {
     score.value += 20;
     feedbackMessage.value = "🎉 Tuyệt vời! Bạn đã tìm ra chìa khóa!";
@@ -339,6 +348,14 @@ const saveFinalScore = async () => {
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       body: JSON.stringify({ chapter_id: chapterId, challenge_id: challengeId, score: score.value })
     });
+
+    if (questionResults.value.length > 0) {
+      await fetch("/api/progress/save-answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ challenge_id: challengeId, answers: questionResults.value })
+      });
+    }
   } catch (e) { console.error("Lỗi lưu điểm:", e); }
 };
 

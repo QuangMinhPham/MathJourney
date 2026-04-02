@@ -135,6 +135,7 @@ const showModal = ref(false);
 const score = ref(0);
 const correctMatches = ref(0);
 const containerRef = ref(null);
+const pairResults = ref([]);
 
 // Fetch Data từ backend
 const fetchData = async () => {
@@ -154,9 +155,7 @@ const fetchData = async () => {
     rightItems.value = pairs.map((p, i) => ({
       ...p,
       domId: `key-${i}`,
-      // Dùng index để tạo chữ cái định danh (0→'a', 1→'b'...) thay vì trích xuất từ text
       val: String.fromCharCode(97 + i),
-      // Hiển thị text đã bỏ prefix chữ cái (vd: 'a) Nội dung' → 'Nội dung')
       display_text: stripPrefix(p.right_text || "")
     }));
   } catch (e) {
@@ -268,7 +267,22 @@ const submitGame = () => {
 
   correctMatches.value = correctCount;
   score.value = Math.round((correctCount / leftItems.value.length) * 100);
-  
+
+  // Build pairResults để lưu lịch sử
+  pairResults.value = leftItems.value.map(chestData => {
+    const conn = connections.value.find(c => c.startId === chestData.domId || c.endId === chestData.domId);
+    const keyId = conn ? (conn.startId.startsWith('key') ? conn.startId : conn.endId) : null;
+    const keyData = keyId ? rightItems.value.find(i => i.domId === keyId) : null;
+    const correctKey = rightItems.value.find(k => k.val === chestData.expected);
+    return {
+      question_id: chestData.pair_id,
+      question_text: chestData.left_text,
+      correct_answer: correctKey ? correctKey.display_text : '',
+      user_answer: keyData ? keyData.display_text : '(chưa nối)',
+      is_correct: conn ? conn.isCorrect : false
+    };
+  });
+
   if (score.value >= 50) {
     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
   }
@@ -286,6 +300,14 @@ const saveScoreToDB = async () => {
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       body: JSON.stringify({ chapter_id: chapterId, challenge_id: challengeId, score: score.value })
     });
+
+    if (pairResults.value.length > 0) {
+      await fetch("/api/progress/save-answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ challenge_id: challengeId, answers: pairResults.value })
+      });
+    }
   } catch(e) { console.error(e); }
 };
 

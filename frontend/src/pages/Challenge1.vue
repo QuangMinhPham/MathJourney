@@ -99,6 +99,9 @@ let bubbleInterval = null;
 const isAnswering = ref(false);
 const selectedIdx = ref(null);
 
+// Lưu kết quả từng câu để gửi lên server
+const questionResults = ref([]);
+
 // === COMPUTED ===
 const formattedTime = computed(() => {
   const min = Math.floor(totalTime.value / 60);
@@ -128,6 +131,7 @@ const fetchQuestions = async () => {
       gameQuestions.value = data.questions.map(q => {
         const correctIndex = q.options.findIndex(opt => opt.is_correct === 1);
         return {
+          question_id: q.question_id,
           text: q.question_text,
           options: q.options.map(opt => opt.option_text),
           correctIndex: correctIndex
@@ -197,7 +201,16 @@ const checkAnswer = (idx) => {
     if (isCorrect) {
       score.value += 10;
     }
-    
+
+    const q = gameQuestions.value[activeQuestionIndex.value];
+    questionResults.value.push({
+      question_id: q.question_id,
+      question_text: q.text,
+      correct_answer: q.options[q.correctIndex],
+      user_answer: q.options[idx],
+      is_correct: isCorrect
+    });
+
     trashItems.value[activeQuestionIndex.value].disabled = true;
 
     // Reset trạng thái sau khi đã hiển thị xong hiệu ứng
@@ -241,23 +254,37 @@ const endGame = () => {
 
 const saveScoreToDB = async () => {
   const token = localStorage.getItem("token");
-  const challengeId = 1 + ((chapterId - 1) * 3); 
-  
+  const challengeId = 1 + ((chapterId - 1) * 3);
+
   try {
     await fetch("/api/scores/save", {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json", 
-        "Authorization": `Bearer ${token}` 
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify({ 
-        chapter_id: chapterId, 
-        challenge_id: challengeId, 
-        score: score.value 
+      body: JSON.stringify({
+        chapter_id: chapterId,
+        challenge_id: challengeId,
+        score: score.value
       })
     });
-  } catch(e) {  
-    console.error("Lỗi lưu điểm:", e); 
+
+    if (questionResults.value.length > 0) {
+      await fetch("/api/progress/save-answers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          challenge_id: challengeId,
+          answers: questionResults.value
+        })
+      });
+    }
+  } catch(e) {
+    console.error("Lỗi lưu điểm:", e);
   }
 };
 

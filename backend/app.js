@@ -23,6 +23,8 @@ const chatRoutes = require("./routes/chat_routes");
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const profileRoutes = require('./routes/profileRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const progressRoutes = require('./routes/progressRoutes');
+const db = require('./config/db');
 
 // === 2. CONFIG APP ===
 const PORT = process.env.PORT || 3000;
@@ -71,7 +73,29 @@ app.use("/api/leaderboard", leaderboardRoutes);
 // Route Admin
 app.use("/api/admin", adminRoutes);
 
-// === 5. START SERVER ===
+// Route Progress (lịch sử câu hỏi)
+app.use("/api/progress", progressRoutes);
+
+// === 5. MIGRATION ===
+db.execute(`
+  CREATE TABLE IF NOT EXISTS user_question_answers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    challenge_id INT NOT NULL,
+    question_id INT NOT NULL,
+    question_text TEXT,
+    correct_answer TEXT,
+    user_answer TEXT,
+    is_correct TINYINT(1) DEFAULT 0,
+    answered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_question (user_id, question_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+  )
+`)
+  .then(() => console.log('✅ Migration: bảng user_question_answers sẵn sàng'))
+  .catch(err => console.error('Migration error:', err.message));
+
+// === 6. START SERVER ===
 
 app.listen(PORT, () => {
     console.log(`✅ Server is running on port ${PORT}`);
