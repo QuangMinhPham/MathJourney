@@ -24,6 +24,7 @@ services:
       # FIX 1: Giúp Backend ghi ảnh trực tiếp vào máy thật (Host)
       # Giả sử WORKDIR trong Dockerfile backend là /app
       - ./frontend/public/images/avatars:/app/public/images/avatars
+      - ./frontend/public/images/chapters:/app/public/images/chapters
     depends_on:
       db:
         condition: service_healthy
@@ -46,6 +47,7 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       # Phục vụ ảnh trực tiếp từ máy thật qua cổng 80/443
       - ./frontend/public/images/avatars:/usr/share/nginx/html/images/avatars:ro
+      - ./frontend/public/images/chapters:/usr/share/nginx/html/images/chapters:ro
     depends_on:
       - backend
       - frontend
