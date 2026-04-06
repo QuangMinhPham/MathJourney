@@ -146,29 +146,20 @@
           </div>
         </div>
 
-        <div v-else class="bg-white rounded-3xl p-10 text-center shadow-2xl border-4 border-blue-100 animate-[pop_0.3s_ease-out]">
-          <div class="text-7xl mb-4 animate-bounce">🏆</div>
-          <h2 class="text-4xl font-bold text-blue-600 mb-4">
-            {{ score === questions.length * 10 ? '🎉 Kho Báu Đã Mở! 🎉' : '⭐ Hoàn Thành! ⭐' }}
-          </h2>
-          <p class="text-2xl text-gray-700 mb-6">
-            Bạn đã giải đúng <span class="font-bold text-green-600">{{ Math.round(score/10) }}/{{ questions.length }}</span> câu hỏi.
-          </p>
-          
-          <div class="bg-gradient-to-r from-blue-400 to-indigo-500 text-white rounded-2xl p-8 mb-8 shadow-lg">
-            <div class="text-5xl font-black mb-2">{{ score }} Điểm</div>
-            <div class="text-xl">{{ getScoreMessage() }}</div>
-          </div>
+        <div v-else class="flex items-center justify-center min-h-[300px]"></div>
 
-          <div class="flex justify-center gap-4">
-            <button @click="restartGame" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-full transition-all">
-              <i class="fa-solid fa-rotate-right"></i> Chơi Lại
-            </button>
-            <button @click="$router.push('/lessons')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all">
-              Tiếp Tục 🗺️
-            </button>
-          </div>
-        </div>
+        <ResultModal
+          :show="completed"
+          :correctCount="score / 20"
+          :totalCount="questions.length"
+          :rewardAmount="score"
+          rewardEmoji="🏺"
+          rewardName="Kho Báu"
+          :isPerfect="score === questions.length * 20"
+        >
+          <button class="btn-secondary" @click="restartGame">🔁 Chơi lại</button>
+          <button class="btn-primary" @click="$router.push('/lessons')">➡️ Tiếp tục</button>
+        </ResultModal>
       </div>
 
     </div>
@@ -177,6 +168,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
+import ResultModal from '../components/ResultModal.vue';
 import { useRoute } from 'vue-router';
 
 // Cấu hình
@@ -359,13 +351,6 @@ const saveFinalScore = async () => {
   } catch (e) { console.error("Lỗi lưu điểm:", e); }
 };
 
-const getScoreMessage = () => {
-  const totalPossible = (questions.value.length || 1) * 10;
-  const percentage = (score.value / totalPossible) * 100;
-  if (percentage === 100) return "Bạn thực sự là một huyền thoại săn kho báu!";
-  if (percentage >= 80) return "Rất tốt! Bạn gần như đã làm chủ hòn đảo này!";
-  return "Hãy tiếp tục rèn luyện để trở nên giỏi hơn nhé!";
-};
 
 const restartGame = () => {
   currentIndex.value = 0;

@@ -34,9 +34,9 @@
               <TrendingUp class="text-blue-600" /> Thống Kê
             </h3>
             <div class="space-y-3">
-              <div class="flex justify-between p-3 bg-pink-50 rounded-xl"><span>Ngọc Trai</span><span class="font-bold text-pink-600">{{ data.achievements.pearls }}</span></div>
-              <div class="flex justify-between p-3 bg-pink-50 rounded-xl"><span>Vỏ sò</span><span class="font-bold text-pink-600">{{ data.achievements.shells }}</span></div>
-              <div class="flex justify-between p-3 bg-pink-50 rounded-xl"><span>Kho Báu</span><span class="font-bold text-pink-600">{{ data.achievements.treasures }}</span></div>
+              <div class="flex justify-between p-3 bg-pink-50 rounded-xl"><span>🐚 Vỏ Sò</span><span class="font-bold text-pink-600">{{ data.achievements.pearls }}</span></div>
+              <div class="flex justify-between p-3 bg-pink-50 rounded-xl"><span>💰 Vàng</span><span class="font-bold text-pink-600">{{ data.achievements.shells }}</span></div>
+              <div class="flex justify-between p-3 bg-pink-50 rounded-xl"><span>🏺 Kho Báu</span><span class="font-bold text-pink-600">{{ data.achievements.treasures }}</span></div>
               <div class="flex justify-between p-3 bg-blue-50 rounded-xl"><span>Tổng Điểm</span><span class="font-bold text-blue-600">{{ data.achievements.totalScore }}</span></div>
             </div>
           </div>

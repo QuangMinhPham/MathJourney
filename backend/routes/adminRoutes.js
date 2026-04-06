@@ -9,7 +9,7 @@ const chapterImageStorage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, 'public/images/chapters'),
   filename: (req, file, cb) => cb(null, `chapter_${req.params.chapterId}${path.extname(file.originalname)}`),
 });
-const uploadChapterImage = multer({ storage: chapterImageStorage });
+const uploadChapterImage = multer({ storage: chapterImageStorage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 router.get('/chapters', verifyToken, verifyAdminOrTeacher, adminController.getChapters);
 router.get('/challenges/:chapterId', verifyToken, verifyAdminOrTeacher, adminController.getChallengesByChapter);

@@ -76,16 +76,16 @@
                 <span class="font-bold text-blue-700">{{ student.score }}</span>
               </div>
               <div class="flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full shadow-md transform hover:scale-110 transition-transform">
-                <Gem class="w-4 h-4 text-pink-500" />
-                <span class="font-bold text-pink-600">{{ student.pearls }} 💎</span>
+                <Shell class="w-4 h-4 text-pink-500" />
+                <span class="font-bold text-pink-600">{{ student.pearls }} 🐚</span>
               </div>
               <div class="flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full shadow-md transform hover:scale-110 transition-transform">
-                <Fish class="w-4 h-4 text-orange-500" />
-                <span class="font-bold text-orange-600">{{ student.shells }} 🐚</span>
+                <Coins class="w-4 h-4 text-yellow-500" />
+                <span class="font-bold text-yellow-600">{{ student.shells }} 💰</span>
               </div>
               <div class="flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full shadow-md transform hover:scale-110 transition-transform">
-                <Star class="w-4 h-4 text-yellow-500" />
-                <span class="font-bold text-yellow-700">{{ student.treasure }} 🏆</span>
+                <Trophy class="w-4 h-4 text-amber-500" />
+                <span class="font-bold text-amber-700">{{ student.treasure }} 🏺</span>
               </div>
             </div>
           </div>
@@ -159,7 +159,7 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import {
-  Anchor, Ship, Waves, Compass, Crown, Star, Fish, Award, Gem
+  Anchor, Ship, Waves, Compass, Crown, Shell, Coins, Trophy
 } from 'lucide-vue-next';
 
 const students     = ref([]);
@@ -169,9 +169,9 @@ const totalStudents = ref(0);
 
 const stats = computed(() => [
   { label: 'Thủy Thủ',  value: totalStudents.value, icon: Ship,  textColor: 'text-blue-600',   bgIcon: 'bg-blue-100',   border: 'border-blue-300'   },
-  { label: 'Ngọc Trai', value: students.value.reduce((s, x) => s + x.pearls,  0), icon: Gem,   textColor: 'text-pink-600',   bgIcon: 'bg-pink-100',   border: 'border-pink-300'   },
-  { label: 'Vỏ Sò',     value: students.value.reduce((s, x) => s + x.shells,  0), icon: Fish,  textColor: 'text-orange-600', bgIcon: 'bg-orange-100', border: 'border-orange-300' },
-  { label: 'Kho Báu',   value: students.value.reduce((s, x) => s + x.treasure,0), icon: Award, textColor: 'text-yellow-600', bgIcon: 'bg-yellow-100', border: 'border-yellow-300' },
+  { label: 'Vỏ Sò',   value: students.value.reduce((s, x) => s + x.pearls,  0), icon: Shell,  textColor: 'text-pink-600',   bgIcon: 'bg-pink-100',   border: 'border-pink-300'   },
+  { label: 'Vàng',    value: students.value.reduce((s, x) => s + x.shells,  0), icon: Coins,  textColor: 'text-yellow-600', bgIcon: 'bg-yellow-100', border: 'border-yellow-300' },
+  { label: 'Kho Báu', value: students.value.reduce((s, x) => s + x.treasure,0), icon: Trophy, textColor: 'text-amber-600',  bgIcon: 'bg-amber-100',  border: 'border-amber-300'  },
 ]);
 
 const pageNumbers = computed(() => {

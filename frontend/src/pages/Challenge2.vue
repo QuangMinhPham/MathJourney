@@ -99,24 +99,25 @@
       </div>
     </div>
 
-    <div v-if="showModal" class="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-      <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center border-4 border-amber-400 shadow-2xl animate-popIn">
-        <img src="/images/ruongmo.png" class="w-32 h-32 mx-auto mb-4 drop-shadow-md animate-bounce">
-        <h2 class="text-3xl font-extrabold text-amber-600 mb-2 uppercase">{{ resultTitle }}</h2>
-        <p class="text-gray-600 font-bold mb-8 text-lg">
-          Bạn đã mở được <span class="text-amber-600 text-2xl">{{ correctMatches }}/{{ leftItems.length }}</span> rương tri thức!
-        </p>
-        <button @click="closeModal" class="w-full bg-blue-500 text-white border-b-4 border-blue-700 hover:bg-blue-600 py-3 rounded-xl font-bold uppercase transition-all">
-           Tiếp tục hành trình 🗺️
-        </button>
-      </div>
-    </div>
+    <ResultModal
+      :show="showModal"
+      :correctCount="correctMatches"
+      :totalCount="leftItems.length"
+      :rewardAmount="score"
+      rewardEmoji="💰"
+      rewardName="Vàng"
+      unitLabel="cặp"
+      :isPerfect="score >= 80"
+    >
+      <button class="btn-primary" @click="closeModal">➡️ Tiếp tục</button>
+    </ResultModal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import ResultModal from '../components/ResultModal.vue';
 import confetti from 'canvas-confetti';
 
 const route = useRoute();
@@ -330,11 +331,6 @@ const getItemStatusClass = (id) => {
   return conn.isCorrect ? 'bg-green-100 border-green-500 text-green-700' : 'bg-red-100 border-red-500 text-red-700';
 };
 
-const resultTitle = computed(() => {
-  if (score.value >= 80) return "Xuất sắc! 💎";
-  if (score.value >= 50) return "Khá lắm! 💰";
-  return "Cố lên nào! ⚓";
-});
 
 const handleResize = () => {
   connections.value = connections.value.map(c => {

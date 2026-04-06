@@ -55,26 +55,26 @@
       </div>
     </div>
 
-    <div v-if="gameEnded" id="resultBox" class="modal-box">
-      <div style="font-size: 60px; margin-bottom: 10px;">🏆</div>
-      <h2>Hoàn Thành!</h2>
-      <div id="finalMessage">
-        <h3 :style="{ color: score >= successThreshold ? '#06d6a0' : '#ffb703', margin: '10px 0' }">
-          {{ resultText }}
-        </h3>
-        <div style="margin-top: 20px;">
-          <button class="end-btn btn-secondary" @click="restartGame">🔁 Chơi lại</button>
-          <button class="end-btn btn-primary" @click="$router.push(`/lessons/${chapterId}/challenges`)">➡️ Tiếp tục</button>
-          <button class="end-btn btn-info" @click="$router.push('/')">🏠 Về nhà</button>
-        </div>
-      </div>
-    </div>
+    <ResultModal
+      :show="gameEnded"
+      :correctCount="correctCount"
+      :totalCount="totalQuestions"
+      :rewardAmount="score"
+      rewardEmoji="🐚"
+      rewardName="Vỏ Sò"
+      :isPerfect="score >= successThreshold"
+    >
+      <button class="btn-secondary" @click="restartGame">🔁 Chơi lại</button>
+      <button class="btn-primary" @click="$router.push(`/lessons/${chapterId}/challenges`)">➡️ Tiếp tục</button>
+      <button class="btn-home" @click="$router.push('/')">🏠 Về nhà</button>
+    </ResultModal>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import ResultModal from '../components/ResultModal.vue';
 
 // === CONFIG ===
 const route = useRoute();
@@ -117,9 +117,8 @@ const showOverlay = computed(() => currentQuestion.value || gameEnded.value);
 
 const successThreshold = computed(() => gameQuestions.value.length * 10 * 0.8);
 
-const resultText = computed(() => {
-  return score.value >= successThreshold.value ? `Xuất sắc! +${score.value} điểm` : `Hoàn thành! +${score.value} điểm`;
-});
+const correctCount = computed(() => score.value / 10);
+const totalQuestions = computed(() => gameQuestions.value.length);
 
 // === METHODS ===
 const fetchQuestions = async () => {

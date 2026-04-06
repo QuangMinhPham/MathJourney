@@ -205,8 +205,10 @@ const handleChapterImageUpload = async (e) => {
     const chapter = chapters.value.find(c => c.chapter_id === selectedChapter.value);
     if (chapter) chapter.image = filename;
     imageSaveMsg.value = { ok: true, text: '✅ Đã cập nhật ảnh minh họa!' };
-  } catch {
-    imageSaveMsg.value = { ok: false, text: 'Lỗi khi tải ảnh lên' };
+  } catch (err) {
+    console.error('Upload chapter image error:', err?.response?.data || err?.message || err);
+    const msg = err?.response?.data?.message || 'Lỗi khi tải ảnh lên';
+    imageSaveMsg.value = { ok: false, text: msg };
   } finally {
     isUploadingImage.value = false;
     e.target.value = ''; // reset input để có thể chọn lại cùng file
